@@ -18,5 +18,9 @@ namespace QL_CFE_WPF.Models
 
         [ObservableProperty]
         private bool dangChon;
+        [ObservableProperty]
+        private DateTime? gioVao;
+        [ObservableProperty]
+        private int soMon;
     }
 }

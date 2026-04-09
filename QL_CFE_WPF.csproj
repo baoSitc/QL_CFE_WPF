@@ -22,4 +22,13 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Images\CF001.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\CF002.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

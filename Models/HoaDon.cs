@@ -22,12 +22,11 @@ namespace QL_CFE_WPF.Models
 
         public decimal GiamGia { get; set; }
         public int TrangThai { get; set; }
-        public DateTime GioVao {  get; set; }= DateTime.Now;
-        public DateTime? GioRa {  get; set; }
+        public DateTime GioVao { get; set; } = DateTime.Now;
+        public DateTime? GioRa { get; set; }
 
         // Navigation
         //public Ban Ban { get; set; }
         public List<ChiTietHoaDon> ChiTietHoaDons { get; set; } = new();
-
     }
 }

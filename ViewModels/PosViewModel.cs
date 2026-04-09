@@ -10,8 +10,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-
-
+using System.Windows.Media;
 
 namespace QL_CFE_WPF.ViewModels
 {
@@ -24,22 +23,48 @@ namespace QL_CFE_WPF.ViewModels
         [ObservableProperty]
         private decimal tongTien;
         [ObservableProperty]
+        private decimal tongTienHienTai;
+
+        [ObservableProperty]
         private int maBanNhap;
+
         private HoaDon hoaDonHienTai;
         //[ObservableProperty]
         //private ObservableCollection<Ban> danhSachBan=new();
         [ObservableProperty]
         private Ban selectedBan;
+
         [ObservableProperty]
         private ObservableCollection<BanView> danhSachBan = new();
+
         [ObservableProperty]
         private int? maBanDangChon;
 
+        [ObservableProperty]
+        private decimal giamGia;   // tiền giảm
+
+        [ObservableProperty]
+        private int phanTramGiam; // % giảm
+        [ObservableProperty]
+        private string tuKhoa;
+        public ObservableCollection<SanPham> SanPhamsLoc =>
+    new ObservableCollection<SanPham>(
+        SanPhams.Where(x => string.IsNullOrEmpty(TuKhoa)
+            || x.TenSP.ToLower().Contains(TuKhoa.ToLower()))
+    );
         public PosViewModel()
         {
             LoadSanPham();
             LoadDanhSachBan();
         }
+        partial void OnTuKhoaChanged(string value)
+        {
+            OnPropertyChanged(nameof(SanPhamsLoc));
+        }
+        public List<int> DanhSachGiamGia { get; set; } = new()
+        {
+            0, 5, 10, 20, 30
+        };
         void LoadDanhSachBan()
         {
             using var db = new Data.AppDbContext();
@@ -56,16 +81,108 @@ namespace QL_CFE_WPF.ViewModels
                 {
                     MaBan = b.MaBan,
                     TenBan = b.TenBan,
-                    DangSuDung= hd != null,
+                    DangSuDung = hd != null,
                     // 🔥 tính realtime
-                    TongTien = hd != null? hd.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia)
+                    TongTien = hd != null ? hd.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia)
             : 0,
                     // 🔥 QUAN TRỌNG
-                    DangChon = (maBanDangChon == b.MaBan)
+                    DangChon = (maBanDangChon == b.MaBan),
+                    GioVao = hd?.GioVao,
+                    SoMon = hd != null ? hd.ChiTietHoaDons.Sum(x => x.SoLuong) : 0
                 };
             });
 
             DanhSachBan = new ObservableCollection<BanView>(list);
+            PhanTramGiam = 0;
+        }
+        //Gop ban
+        [RelayCommand]
+        void GopBan(BanView banNguon)
+        {
+            var vm = new ChonBanViewModel(DanhSachBan.ToList());
+            var win = new Views.ChonBanWindow
+            {
+                DataContext = vm
+            };
+            vm.OnBanSelected = (banDich) =>
+            {
+                if (banDich.MaBan == banNguon.MaBan) return;
+                //Gộp
+                GopHaiBan(banNguon, banDich);
+                win.Close();
+            };
+            win.ShowDialog();
+        }
+        //Chuyen ban
+        [RelayCommand]
+        void ChuyenBan(BanView banNguon)
+        {
+            var vm = new ChonBanViewModel(DanhSachBan.ToList());
+            var win = new Views.ChonBanWindow
+            {
+                DataContext = vm
+            };
+                        vm.OnBanSelected = (banDich) =>
+                        { 
+                         if (banDich.MaBan == banNguon.MaBan) return;
+
+                            ChuyenBanTrongDB(banNguon, banDich);
+                            win.Close();
+                        };
+            win.ShowDialog();
+        }
+        void ChuyenBanTrongDB(BanView banNguon, BanView banDich)
+        {
+            using var db = new Data.AppDbContext();
+            var hdNguon = db.HoaDons.FirstOrDefault(x => x.MaBan == banNguon.MaBan && x.TrangThai == 0);
+            var hdDich = db.HoaDons.FirstOrDefault(x => x.MaBan == banDich.MaBan && x.TrangThai == 0);
+            if (hdNguon != null)
+            {
+                hdNguon.MaBan = banDich.MaBan;
+            }
+            if (hdDich != null)
+            {
+                hdDich.MaBan = banNguon.MaBan;
+            }
+            db.SaveChanges();
+            LoadDanhSachBan();
+        }
+        void GopHaiBan(BanView banNguon, BanView banDich)
+        {
+            using var db = new Data.AppDbContext();
+            var hdNguon = db.HoaDons.Include(x => x.ChiTietHoaDons).FirstOrDefault(x => x.MaBan == banNguon.MaBan && x.TrangThai == 0);
+            var hdDich = db.HoaDons.Include(x => x.ChiTietHoaDons).FirstOrDefault(x => x.MaBan == banDich.MaBan && x.TrangThai == 0);
+            if (hdNguon != null && hdDich != null)
+            {
+                // gộp vào dich
+                foreach (var ct in hdNguon.ChiTietHoaDons)
+                {
+                    var ctDich = hdDich.ChiTietHoaDons.FirstOrDefault(x => x.MaSP == ct.MaSP);
+                    if (ctDich != null)
+                    {
+                        ctDich.SoLuong += ct.SoLuong;
+                    }
+                    else
+                    {
+                        hdDich.ChiTietHoaDons.Add(new ChiTietHoaDon
+                        {
+                            MaHD = hdDich.MaHD,
+                            MaSP = ct.MaSP,
+                            SoLuong = ct.SoLuong,
+                            Gia = ct.Gia
+                        });
+                    }
+                }
+                // xóa bàn nguồn
+                db.HoaDons.Remove(hdNguon);
+            }
+            else if (hdNguon != null) // chỉ có bàn nguồn có hóa đơn, chuyển sang bàn đích
+            {
+                hdNguon.MaBan = banDich.MaBan;
+            }
+            // nếu chỉ có bàn đích có hóa đơn thì không cần làm gì
+            db.SaveChanges();
+            LoadDanhSachBan();
         }
         [RelayCommand]
         void ChonBan(object? obj)
@@ -100,7 +217,7 @@ namespace QL_CFE_WPF.ViewModels
                     //nếu không tạo mới thì reset lại bàn đang chọn
                     maBanDangChon = null;
                     ban.DangChon = false;
-                   
+
                     return;
                 }
 
@@ -124,9 +241,9 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         void TaoBan()
         {
-           using var db = new Data.AppDbContext();
+            using var db = new Data.AppDbContext();
             var ban = new Ban { TenBan = $"Bàn {maBanNhap}" };
-            //kiem tra xem bàn đã tồn tại chưa
+            //kiem tra xem bàn đã tồn tai chưa
             var hoadonDangMo = db.HoaDons
      .Include(x => x.ChiTietHoaDons)
          .ThenInclude(ct => ct.SanPham)
@@ -134,7 +251,7 @@ namespace QL_CFE_WPF.ViewModels
             //nếu đã tồn tại bàn đang mở thì không tạo mới
             if (hoadonDangMo != null)
             {
-                hoaDonHienTai=hoadonDangMo;
+                hoaDonHienTai = hoadonDangMo;
                 LoadGioHang(hoadonDangMo);
             }
             else
@@ -152,23 +269,23 @@ namespace QL_CFE_WPF.ViewModels
                 };
                 db.HoaDons.Add(hoaDon);
                 db.SaveChanges();
-                hoaDonHienTai=hoaDon;
+                hoaDonHienTai = hoaDon;
                 MessageBox.Show($"Bàn {maBanNhap} đã được tạo và sẵn sàng phục vụ.");
             }
-           
+
         }
 
         void LoadSanPham()
         {
             using var db = new Data.AppDbContext();
-            SanPhams = new ObservableCollection<SanPham>(db.SanPhams.OrderBy(x=>x.TenSP).ToList());
+            SanPhams = new ObservableCollection<SanPham>(db.SanPhams.OrderBy(x => x.TenSP).ToList());
         }
 
         //thêm sản phẩm vào giỏ hàng
         [RelayCommand]
         void AddToCart(SanPham sp)
         {
-            if (sp == null || hoaDonHienTai==null) return;
+            if (sp == null || hoaDonHienTai == null) return;
 
             using var db = new Data.AppDbContext();
 
@@ -187,8 +304,10 @@ namespace QL_CFE_WPF.ViewModels
                     MaHD = hoaDonHienTai.MaHD,
                     MaSP = sp.MaSP,
                     SoLuong = 1,
-                    Gia = sp.Gia
+                    Gia = sp.Gia,
+
                 });
+
             }
 
             db.SaveChanges();
@@ -200,8 +319,26 @@ namespace QL_CFE_WPF.ViewModels
                 .First(x => x.MaHD == hoaDonHienTai.MaHD);
 
             hoaDonHienTai = hd;
-           
-           
+            LoadGioHang(hd);
+            var item = GioHang.FirstOrDefault(x => x.MaSP == sp.MaSP);
+
+            if (item != null)
+            {
+                item.IsHighlight = true;
+
+                // 🔥 tắt sau 300ms
+                Task.Run(async () =>
+                {
+                    await Task.Delay(600);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        item.IsHighlight = false;
+                    });
+                });
+            }
+
+
         }
         [RelayCommand]
         void TangSoLuong(object? obj)
@@ -216,6 +353,7 @@ namespace QL_CFE_WPF.ViewModels
             if (ct != null)
             {
                 ct.SoLuong += 1;
+
                 db.SaveChanges();
             }
 
@@ -233,6 +371,7 @@ namespace QL_CFE_WPF.ViewModels
 
             if (ct != null)
             {
+
                 ct.SoLuong -= 1;
 
                 if (ct.SoLuong <= 0)
@@ -272,8 +411,27 @@ namespace QL_CFE_WPF.ViewModels
 
             hoaDonHienTai = hd;
             LoadGioHang(hd);
+            PhanTramGiam = 0; // reset giảm giá khi thay đổi món
         }
+        partial void OnPhanTramGiamChanged(int value)
 
+        {
+            if (GioHang == null || GioHang.Count == 0) return;
+            var tong = hoaDonHienTai.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia);
+            GiamGia = tong * value / 100;
+
+            CalculateTotal();
+        }
+        void TinhTienSauGiamGia()
+        {
+            if (hoaDonHienTai == null) return;
+            var tong = hoaDonHienTai.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia);
+            if (PhanTramGiam > 0)
+            {
+                GiamGia = tong * PhanTramGiam / 100;
+            }
+
+        }
         //load gio hang
         void LoadGioHang(HoaDon hd)
         {
@@ -281,7 +439,7 @@ namespace QL_CFE_WPF.ViewModels
 
             gioHang.Clear();
 
-            foreach (var ct in hd.ChiTietHoaDons.OrderBy(x=>x.SanPham.TenSP))
+            foreach (var ct in hd.ChiTietHoaDons.OrderBy(x => x.SanPham.TenSP))
             {
                 // var sp = db.SanPhams.Find(ct.MaSP);
 
@@ -290,21 +448,25 @@ namespace QL_CFE_WPF.ViewModels
                     MaSP = ct.MaSP,
                     TenSP = ct.SanPham?.TenSP,
                     Gia = ct.Gia,
-                    SoLuong = ct.SoLuong                   
+                    SoLuong = ct.SoLuong
 
                 });
             }
-           
+
 
             CalculateTotal();
         }
         void CalculateTotal()
         {
+            TinhTienSauGiamGia();
             TongTien = GioHang.Sum(h => h.Gia * h.SoLuong);
+            TongTienHienTai = TongTien - GiamGia;
             var ban = DanhSachBan.FirstOrDefault(x => x.MaBan == MaBanDangChon);
             if (ban != null)
             {
                 ban.TongTien = TongTien; // 🔥 UI tự update
+                //update số món
+                ban.SoMon = GioHang.Sum(x => x.SoLuong);
             }
         }
         //xóa sản phẩm khỏi giỏ hàng
@@ -329,9 +491,10 @@ namespace QL_CFE_WPF.ViewModels
 
             hoaDon.TrangThai = 1; // đánh dấu đã thanh toán
             hoaDon.GioRa = DateTime.Now;
-            hoaDon.TongTien = TongTien;
+            hoaDon.TongTien = TongTienHienTai;
+            hoaDon.GiamGia = GiamGia;
             db.SaveChanges();
-           
+
             TongTien = 0;
             InBill(hoaDon);
 
@@ -339,46 +502,189 @@ namespace QL_CFE_WPF.ViewModels
             GioHang.Clear();
             hoaDonHienTai = null;
             MaBanDangChon = null;
+            TongTienHienTai = 0;
+            GiamGia = 0;
             LoadDanhSachBan();
         }
+
         void InBill(HoaDon hd)
         {
             var printDialog = new PrintDialog();
+            if (printDialog.ShowDialog() != true) return;
 
-            if (printDialog.ShowDialog() == true)
+            var doc = new FlowDocument();
+
+            // 🔥 khổ giấy (58mm / 80mm)
+            doc.PageWidth = 300;
+            doc.PagePadding = new Thickness(10);
+
+            // 🔥 font chuẩn bill
+            doc.FontFamily = new FontFamily("Courier New");
+            doc.FontSize = 12;
+
+            // ================= HEADER =================
+            doc.Blocks.Add(new Paragraph(new Run("QUÁN CAFE BẰNG LĂNG TÍM"))
             {
-                var doc = new FlowDocument();
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center
+            });
 
-                doc.Blocks.Add(new Paragraph(new Run("QUÁN CAFE BẰNG LĂNG TÍM"))
-                {
-                    FontSize = 18,
-                    FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center
-                });
+            doc.Blocks.Add(new Paragraph(new Run("-----------------------------"))
+            {
+                TextAlignment = TextAlignment.Center
+            });
+            // No65i dung so ban
+            var sobanTable = new Table();
+            sobanTable.Columns.Add(new TableColumn { Width = new GridLength(120) });
+            sobanTable.Columns.Add(new TableColumn { Width = new GridLength(140) });
 
-                doc.Blocks.Add(new Paragraph(new Run($"Bàn: {hd.MaBan}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Giờ vào: {hd.GioVao:HH:mm}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Giờ ra: {hd.GioRa:HH:mm}")));
+            var sobanlGroup = new TableRowGroup();
+            sobanTable.RowGroups.Add(sobanlGroup);
 
-                doc.Blocks.Add(new Paragraph(new Run("--------------------------------")));
+            var sobanRow = new TableRow();
 
-                foreach (var ct in hd.ChiTietHoaDons)
-                {
-                    doc.Blocks.Add(new Paragraph(
-                        new Run($"{ct.SanPham?.TenSP} x{ct.SoLuong} = {(ct.SoLuong * ct.Gia):N0} đ")));
-                }
+            sobanRow.Cells.Add(new TableCell(new Paragraph(new Run($"Bàn: {hd.MaBan}"))));
 
-                doc.Blocks.Add(new Paragraph(new Run("--------------------------------")));
+            sobanRow.Cells.Add(new TableCell(new Paragraph(new Run($"Giờ Vào:{hd.GioVao.ToString("HH:mm")}")))
+            {
+                TextAlignment = TextAlignment.Right,
 
-                doc.Blocks.Add(new Paragraph(new Run($"TỔNG: {hd.TongTien:N0} đ"))
-                {
-                    FontWeight = FontWeights.Bold
-                });
+            });
 
-                doc.PagePadding = new Thickness(20);
+            sobanlGroup.Rows.Add(sobanRow);
+            var row2 = new TableRow();
 
-                printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "In hóa đơn");
+            row2.Cells.Add(new TableCell(
+                new Paragraph(new Run($"Thu ngân: Yến Vy"))
+            ));
+
+            row2.Cells.Add(new TableCell(
+                new Paragraph(new Run($"Giờ ra: {hd.GioRa?.ToString("HH:mm") ?? ""}"))
+            )
+            {
+                TextAlignment = TextAlignment.Right
+            });
+
+            sobanlGroup.Rows.Add(row2);
+
+            doc.Blocks.Add(sobanTable);
+
+            //doc.Blocks.Add(new Paragraph(new Run($"Bàn: {hd.MaBan}    {DateTime.Now:HH:mm}")));
+
+            // ================= TABLE =================
+            var table = new Table();
+
+            // 3 cột
+            table.Columns.Add(new TableColumn { Width = new GridLength(140) }); // tên
+            table.Columns.Add(new TableColumn { Width = new GridLength(50) });  // ĐG
+            table.Columns.Add(new TableColumn { Width = new GridLength(20) });  // SL
+            table.Columns.Add(new TableColumn { Width = new GridLength(60) });  // tiền
+
+            var rowGroup = new TableRowGroup();
+            table.RowGroups.Add(rowGroup);
+            // tiêu đề bảng
+            var headerRow = new TableRow();
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Tên hàng"))));
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("ĐG")))
+            {
+                TextAlignment = TextAlignment.Center
+            });
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("SL")))
+            {
+                TextAlignment = TextAlignment.Center
+            });
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("T.Tiền")))
+            {
+                TextAlignment = TextAlignment.Center
+            });
+            // in đậm tiêu đề
+            foreach (var cell in headerRow.Cells)
+            {
+                cell.FontWeight = FontWeights.Bold;
+                cell.Padding = new Thickness(2);
             }
+            rowGroup.Rows.Add(headerRow);
+            // dòng kẻ
+            rowGroup.Rows.Add(new TableRow()); // spacer
+
+            // ===== DATA =====
+            foreach (var ct in hd.ChiTietHoaDons)
+            {
+                var row = new TableRow();
+
+                // tên (cho phép xuống dòng)
+                row.Cells.Add(new TableCell(new Paragraph(new Run(ct.SanPham?.TenSP ?? "")))
+                {
+                    Padding = new Thickness(2),
+                });
+                // đơn giá
+                row.Cells.Add(new TableCell(new Paragraph(new Run(ct.Gia.ToString("N0"))))
+                {
+                    TextAlignment = TextAlignment.Right,
+                    Padding = new Thickness(2)
+                });
+
+                // số lượng
+                row.Cells.Add(new TableCell(new Paragraph(new Run(ct.SoLuong.ToString("N0"))))
+                {
+                    TextAlignment = TextAlignment.Center,
+                    Padding = new Thickness(2)
+                });
+
+                // tiền
+                row.Cells.Add(new TableCell(new Paragraph(
+                    new Run((ct.SoLuong * ct.Gia).ToString("N0"))))
+                {
+                    TextAlignment = TextAlignment.Right,
+                    Padding = new Thickness(2)
+                });
+
+                rowGroup.Rows.Add(row);
+            }
+
+
+            doc.Blocks.Add(table);
+
+            // ================= FOOTER =================
+            doc.Blocks.Add(new Paragraph(new Run("-----------------------------"))
+            {
+                TextAlignment = TextAlignment.Center
+            });
+
+            // tổng tiền
+            var totalTable = new Table();
+            totalTable.Columns.Add(new TableColumn { Width = new GridLength(190) });
+            totalTable.Columns.Add(new TableColumn { Width = new GridLength(80) });
+
+            var totalGroup = new TableRowGroup();
+            totalTable.RowGroups.Add(totalGroup);
+
+            var totalRow = new TableRow();
+
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Run("TỔNG CỘNG")))
+            {
+                FontWeight = FontWeights.Bold
+            });
+
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Run(hd.TongTien.ToString("N0"))))
+            {
+                TextAlignment = TextAlignment.Right,
+                FontWeight = FontWeights.Bold
+            });
+
+            totalGroup.Rows.Add(totalRow);
+
+            doc.Blocks.Add(totalTable);
+
+            // lời cảm ơn
+            doc.Blocks.Add(new Paragraph(new Run("Cảm ơn quý khách!"))
+            {
+                TextAlignment = TextAlignment.Center
+            });
+
+            // ================= PRINT =================
+            printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Bill");
         }
     }
 }
