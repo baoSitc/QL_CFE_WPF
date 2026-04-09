@@ -3,14 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"             
              xmlns:local="clr-namespace:QL_CFE_WPF.Views"
              xmlns:vm="clr-namespace:QL_CFE_WPF.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">    
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:PathToImageConverter x:Key="ImgConverter"/>
+    </UserControl.Resources>
+
     <UserControl.DataContext>
         <vm:PosViewModel/>
     </UserControl.DataContext>
-   
+
 
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
@@ -109,74 +114,71 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- 🔥 DANH SÁCH SẢN PHẨM -->
-            <StackPanel Grid.Row="1">
+            <Grid Grid.Row="1">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- SEARCH -->
+                    <RowDefinition Height="*"/>
+                    <!-- LIST -->
+                </Grid.RowDefinitions>
 
                 <!-- 🔍 SEARCH -->
-                <TextBox Width="250"
-             Margin="10"
+                <TextBox Grid.Row="0"
+             HorizontalAlignment="Center"
+             Margin="0,5,0,5"
              Height="30"
-             FontSize="14"             
-             Text="{Binding TuKhoa, UpdateSourceTrigger=PropertyChanged}"/>
+             FontSize="14"
+             materialDesign:HintAssist.Hint="Nhập tên sản phẩm cần tìm"
+             Text="{Binding TuKhoa, UpdateSourceTrigger=PropertyChanged}" Width="292"/>
 
-                <!-- 🧃 DANH SÁCH SẢN PHẨM -->
-                <ItemsControl ItemsSource="{Binding SanPhamsLoc}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                <!-- 🔥 SCROLL -->
+                <ScrollViewer Grid.Row="1"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled" CanContentScroll="True">
+                    <ItemsControl ItemsSource="{Binding SanPhamsLoc}">
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Width="140"
-                        Height="160"
-                        Margin="8" 
-                        Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding}">
-                                
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemWidth="150" ItemHeight="200"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                                <StackPanel>
-                                   
-                                    <!-- 🖼 Hình -->
-                                    <Image Height="80" Source="/Images/CF001.jpg"/>
-                                   
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
 
-                                    <!-- 🏷 Tên -->
-                                    <TextBlock Text="{Binding TenSP}"
-                                   FontWeight="Bold"
-                                   FontSize="13"
-                                   TextWrapping="Wrap"
-                                   TextAlignment="Center"
-                                   Margin="5,3"/>
+                                <materialDesign:Card Width="150" Height="200" Margin="8" Background="LightBlue">
+                                    <Button Command="{Binding DataContext.AddToCartCommand, 
+                                        RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" 
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="150" >
+                                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                                            <!-- ẢNH FULL -->
+                                            <Border CornerRadius="10" ClipToBounds="True">
+                                                <Image Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding HinhAnh, Converter={StaticResource ImgConverter}}"/>
+                                            </Border>
+                                            <!-- OVERLAY -->
+                                            <Border Background="#40000000" VerticalAlignment="Bottom" Height="50"/>
+                                            <!-- TEXT -->
+                                            <StackPanel VerticalAlignment="Bottom" Margin="8">
+                                                <TextBlock Text="{Binding TenSP}" Foreground="White" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center"/>
+                                                <TextBlock Text="{Binding Gia, StringFormat={}{0:N0} đ}" Foreground="Yellow" FontWeight="Bold" TextAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+                                </materialDesign:Card>
 
-                                    <!-- 💰 Giá -->
-                                    <TextBlock Text="{Binding Gia, StringFormat={}{0:N0} đ}"
-                                   Foreground="OrangeRed"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"/>
-                                </StackPanel>
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border CornerRadius="10"
-                                        Background="{TemplateBinding Background}"
-                                        BorderBrush="#DDD"
-                                        BorderThickness="1"
-                                        Padding="5">    
-                                            <ContentPresenter/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                               
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
 
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    </ItemsControl>
 
-            </StackPanel>
+                </ScrollViewer>
 
+            </Grid>
         </Grid>
+
+
+
 
         <!-- GIỎ HÀNG -->
         <StackPanel Grid.Column="1">
@@ -213,12 +215,12 @@
                     From="Yellow"
                     To="Transparent"
                     Duration="0:0:0.15"/>
-                                             <!--nhấp nháy opacity--> 
+                                            <!--nhấp nháy opacity-->
                                             <DoubleAnimation 
                                     Storyboard.TargetProperty="Opacity"
                                     From="1" To="0.5"
                                     Duration="0:0:0.5"/>
-                                            
+
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
@@ -344,9 +346,9 @@
                 Width="120"
                 Text="Giảm giá:" FontSize="14" FontWeight="Bold" Foreground="DarkBlue"
                 VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5" TextAlignment="Right" BorderBrush="White"/>
-                
 
-                <!-- Combo -->                
+
+                <!-- Combo -->
                 <ComboBox Grid.Column="1"
               Width="50"
               ItemsSource="{Binding DanhSachGiamGia}"
@@ -361,9 +363,9 @@
             </Grid>
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <!-- đẩy -->
-                <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <!-- đẩy -->
+                    <ColumnDefinition Width="Auto"/>
 
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0"
