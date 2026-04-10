@@ -24,6 +24,11 @@ namespace QL_CFE_WPF.Models
         public int TrangThai { get; set; }
         public DateTime GioVao { get; set; } = DateTime.Now;
         public DateTime? GioRa { get; set; }
+        public DateTime? NgayThanhToan { get; set; }
+        public decimal? TienKhachDua { get; set; }
+        public decimal? TienThoi { get; set; }
+        public string? PhuongThuc { get; set; }
+
 
         // Navigation
         //public Ban Ban { get; set; }

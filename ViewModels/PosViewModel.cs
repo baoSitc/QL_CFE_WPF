@@ -189,7 +189,7 @@ namespace QL_CFE_WPF.ViewModels
         {
             if (obj is not BanView ban) return;
             // 🔥 lưu lại bàn đang chọn
-            maBanDangChon = ban.MaBan;
+            MaBanDangChon = ban.MaBan;
             // reset chọn
             foreach (var b in DanhSachBan)
                 b.DangChon = false;
@@ -215,7 +215,7 @@ namespace QL_CFE_WPF.ViewModels
                 if (MessageBox.Show($"Bàn {ban.TenBan} hiện chưa có hóa đơn nào. Bạn có muốn tạo mới?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 {
                     //nếu không tạo mới thì reset lại bàn đang chọn
-                    maBanDangChon = null;
+                    MaBanDangChon = null;
                     ban.DangChon = false;
 
                     return;
@@ -452,8 +452,6 @@ namespace QL_CFE_WPF.ViewModels
 
                 });
             }
-
-
             CalculateTotal();
         }
         void CalculateTotal()
@@ -484,17 +482,32 @@ namespace QL_CFE_WPF.ViewModels
             // Xử lý thanh toán ở đây (lưu hóa đơn vào database, in hóa đơn, v.v.)
             // Sau khi thanh toán xong, xóa giỏ hàng và cập nhật tổng tiền
             using var db = new Data.AppDbContext();
-            //var hoaDon = db.HoaDons.FirstOrDefault(h => h.MaBan == maBanDangChon && h.TrangThai == 0);
+            //Thanh toán 
+            if(hoaDonHienTai == null) return;
+            var vm = new ThuTienViewModel
+            {
+                TongTienHienTai = this.TongTienHienTai,
+                PhuongThuc = "Tiền mặt"
+            };
+            var win = new Views.ThuTienWindow
+            {
+                DataContext = vm
+            };
+            vm.OnThanhToanThanhCong = () =>
+            {
             var hoaDon = db.HoaDons
        .Include(x => x.ChiTietHoaDons).ThenInclude(ct => ct.SanPham)
        .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD);
+                hoaDon.TrangThai = 1; // đã thanh toán
+                hoaDon.NgayThanhToan = DateTime.Now;
+                hoaDon.TienKhachDua = vm.TienKhachDua;
+                hoaDon.TienThoi = vm.TienThoi;
+                hoaDon.PhuongThuc = vm.PhuongThuc;               
 
-            hoaDon.TrangThai = 1; // đánh dấu đã thanh toán
-            hoaDon.GioRa = DateTime.Now;
+                hoaDon.GioRa = DateTime.Now;
             hoaDon.TongTien = TongTienHienTai;
             hoaDon.GiamGia = GiamGia;
             db.SaveChanges();
-
             TongTien = 0;
             InBill(hoaDon);
 
@@ -505,6 +518,9 @@ namespace QL_CFE_WPF.ViewModels
             TongTienHienTai = 0;
             GiamGia = 0;
             LoadDanhSachBan();
+                win.Close();
+            };
+            win.ShowDialog();
         }
 
         void InBill(HoaDon hd)

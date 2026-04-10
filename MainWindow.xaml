@@ -7,20 +7,24 @@
         xmlns:local="clr-namespace:QL_CFE_WPF"
         mc:Ignorable="d"
         Title="Cà Phê App" Height="450" Width="800">
-    
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Border BorderBrush="Red"
+        BorderThickness="2"
+        CornerRadius="10"
+        Padding="5">
+        <Grid >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- MENU -->
-        <StackPanel>
-            <Button Content="Bán hàng" Command="{Binding ShowPosCommand}"/>
-            <Button Content="Sản phẩm" Command="{Binding ShowSanPhamCommand}"/>
-        </StackPanel>
+            <!-- MENU -->
+            <StackPanel Margin="5">
+                <Button Content="Bán hàng" Command="{Binding ShowPosCommand}"/>
+                <Button Content="Sản phẩm" Command="{Binding ShowSanPhamCommand}" Margin="5"/>
+            </StackPanel>
 
-        <!-- NỘI DUNG -->
-        <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
-    </Grid>
+            <!-- NỘI DUNG -->
+            <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
+        </Grid>
+    </Border>
 </Window>
