@@ -2,10 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using QL_CFE_WPF.Models;
+using QL_CFE_WPF.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Windows;
 
 namespace QL_CFE_WPF.ViewModels
 {
@@ -88,6 +90,17 @@ namespace QL_CFE_WPF.ViewModels
         void ShowPos()
         {
             CurrentView = new Views.PosView();
+        }
+        [RelayCommand]
+        void MoBaoCaoDoanhThu()
+        {
+            CurrentView = new Views.BaoCaoDoanhThu();
+        }
+
+        [RelayCommand]
+        void MoBaoCaoHangHoa()
+        {
+            CurrentView = new BaoCaoHangHoa();
         }
     }
 }

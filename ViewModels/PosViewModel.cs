@@ -702,5 +702,7 @@ namespace QL_CFE_WPF.ViewModels
             // ================= PRINT =================
             printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Bill");
         }
+       
+        
     }
 }

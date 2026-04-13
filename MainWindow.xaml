@@ -11,6 +11,7 @@
         BorderThickness="2"
         CornerRadius="10"
         Padding="5">
+        
         <Grid >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
@@ -19,12 +20,32 @@
 
             <!-- MENU -->
             <StackPanel Margin="5">
-                <Button Content="Bán hàng" Command="{Binding ShowPosCommand}"/>
-                <Button Content="Sản phẩm" Command="{Binding ShowSanPhamCommand}" Margin="5"/>
+                <Button Content="Bán hàng"
+        Style="{StaticResource MenuButton}"
+        Command="{Binding ShowPosCommand}"/>
+
+                <Button Content="Sản phẩm"
+        Style="{StaticResource MenuButton}"
+        Command="{Binding ShowSanPhamCommand}"/>
+
+                <Expander Header="📊 Báo Cáo" Margin="5">
+
+                    <StackPanel>
+                        <Button Content="Doanh thu"
+                Style="{StaticResource MenuButton}"
+                Command="{Binding MoBaoCaoDoanhThuCommand}"/>
+
+                        <Button Content="Hàng hóa"
+                Style="{StaticResource MenuButton}"
+                Command="{Binding MoBaoCaoHangHoaCommand}"/>
+                    </StackPanel>
+
+                </Expander>
             </StackPanel>
 
             <!-- NỘI DUNG -->
             <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
+            
         </Grid>
     </Border>
 </Window>
