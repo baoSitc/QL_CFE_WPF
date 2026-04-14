@@ -27,6 +27,8 @@
                 <Button Content="Sản phẩm"
         Style="{StaticResource MenuButton}"
         Command="{Binding ShowSanPhamCommand}"/>
+                <Button Content="Dashboard"
+        Command="{Binding ShowDashboardCommand}"/>
 
                 <Expander Header="📊 Báo Cáo" Margin="5">
 

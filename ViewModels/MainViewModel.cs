@@ -102,5 +102,13 @@ namespace QL_CFE_WPF.ViewModels
         {
             CurrentView = new BaoCaoHangHoa();
         }
+        [RelayCommand]
+        void ShowDashboard()
+        {
+            CurrentView = new DashboardView
+            {
+                DataContext = new DashboardViewModel()
+            };
+        }
     }
 }
