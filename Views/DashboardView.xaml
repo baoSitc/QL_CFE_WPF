@@ -138,29 +138,49 @@
                    Margin="0,0,10,0"/>
 
                 <ComboBox Width="150"
-                  ItemsSource="{Binding DanhSachKieu}"
-                  SelectedItem="{Binding KieuDangChon}"/>                
+          ItemsSource="{Binding DanhSachKieu}"
+          SelectedItem="{Binding KieuDangChon}">
+
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumDesc}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+
+                </ComboBox>
             </StackPanel>
             <!-- 🔥 CHART -->
-            <Border Grid.Row="1" Margin="5" Background="White" CornerRadius="10">
-                <lvc:CartesianChart Grid.Row="1"
-                    Series="{Binding Series}"
-                    Margin="5"
-                                    LegendLocation="Right">
+            <Border Grid.Row="1"
+        Background="White"
+        CornerRadius="10"
+        Padding="10"
+        Margin="5"
+        materialDesign:ElevationAssist.Elevation="Dp2">
+
+                <lvc:CartesianChart Series="{Binding Series}"
+                        LegendLocation="Right"
+                        Hoverable="True"                       
+                        AnimationsSpeed="0:0:0.5">
 
                     <!-- TRỤC X -->
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Labels="{Binding Labels}"/>
+                        <lvc:Axis Labels="{Binding Labels}"
+          Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
                     </lvc:CartesianChart.AxisX>
 
-                    <!-- 🔥 TRỤC Y FORMAT TIỀN -->
+                    <!-- TRỤC Y -->
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis LabelFormatter="{Binding Formatter}"/>
+
+                        <!-- 💰 DOANH THU -->
+                        <lvc:Axis Title="Doanh thu"
+                      LabelFormatter="{Binding Formatter}" FontSize="12"/>
+
                         <!-- 🪑 SỐ BÀN -->
                         <lvc:Axis Title="Số bàn"
-                        Position="RightTop"/>
+                      Position="RightTop" LabelFormatter="{Binding SoBanFormatter}"/>
+
                     </lvc:CartesianChart.AxisY>
-                   
+
                 </lvc:CartesianChart>
 
             </Border>

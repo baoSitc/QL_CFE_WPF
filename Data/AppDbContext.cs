@@ -11,6 +11,7 @@ namespace QL_CFE_WPF.Data
         public DbSet<Models.Ban> Bans { get; set; }
         public DbSet<Models.HoaDon> HoaDons { get; set; }
         public DbSet<Models.ChiTietHoaDon> ChiTietHoaDons { get; set; }
+        public DbSet<Models.NhanVien> NhanViens { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(

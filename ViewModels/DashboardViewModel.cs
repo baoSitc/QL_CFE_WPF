@@ -27,6 +27,8 @@ namespace QL_CFE_WPF.ViewModels
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
         public Func<ChartPoint, string> PointFormatter { get; set; }
+        public Func<double, string> SoBanFormatter { get; set; } =
+    value => ((int)value).ToString();
         partial void OnKieuDangChonChanged(KieuThongKe value)
         {
             LoadChart();
@@ -206,24 +208,42 @@ namespace QL_CFE_WPF.ViewModels
             Labels = result.Select(x => x.Label).ToArray();
 
             Series = new SeriesCollection
+{
+    // 💰 DOANH THU
+    new ColumnSeries
     {
-        new ColumnSeries
-        {
-            Title = "Doanh thu",
-            Values = new ChartValues<decimal>(result.Select(x => x.Tong)),
-            ScalesYAt = 0,
-            DataLabels = true,
-            LabelPoint = p => p.Y.ToString("N0") + " đ"
-        },
-        new LineSeries
-        {
-            Title = "Số bàn",
-            Values = new ChartValues<int>(result.Select(x => x.SoBan)),
-            ScalesYAt = 1,
-            DataLabels = true,
-            LabelPoint = p => p.Y.ToString("N0") + " bàn"
-        }
-    };
+        Title = "Doanh thu",
+        Values = new ChartValues<decimal>(result.Select(x => x.Tong)),
+
+        ScalesYAt = 0,
+
+        DataLabels = true,
+        LabelPoint = p => p.Y.ToString("N0") + " đ",
+
+        MaxColumnWidth = 40,
+        ColumnPadding = 10,
+
+        Fill = System.Windows.Media.Brushes.SeaGreen
+    },
+
+    // 🪑 SỐ BÀN
+    new LineSeries
+    {
+        Title = "Số bàn",
+        Values = new ChartValues<int>(result.Select(x => x.SoBan)),
+
+        ScalesYAt = 1,
+
+        DataLabels = true,
+        LabelPoint = p =>((int)p.Y).ToString()+" bàn",
+
+        StrokeThickness = 3,
+        PointGeometrySize = 10,
+
+        Stroke = System.Windows.Media.Brushes.Orange,
+        Fill = System.Windows.Media.Brushes.Transparent
+    }
+};
 
             OnPropertyChanged(nameof(Labels));
             OnPropertyChanged(nameof(Series));

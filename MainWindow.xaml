@@ -27,6 +27,9 @@
                 <Button Content="Sản phẩm"
         Style="{StaticResource MenuButton}"
         Command="{Binding ShowSanPhamCommand}"/>
+                <Button Content="Nhân viên"
+        Style="{StaticResource MenuButton}"
+        Command="{Binding ShowNhanVienCommand}"/>
                 <Button Content="Dashboard"
         Command="{Binding ShowDashboardCommand}"/>
 

@@ -110,5 +110,10 @@ namespace QL_CFE_WPF.ViewModels
                 DataContext = new DashboardViewModel()
             };
         }
+        [RelayCommand]
+        void ShowNhanVien()
+        {
+            CurrentView = new NhanVienView();
+        }
     }
 }
