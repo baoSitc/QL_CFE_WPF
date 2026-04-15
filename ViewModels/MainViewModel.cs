@@ -115,5 +115,10 @@ namespace QL_CFE_WPF.ViewModels
         {
             CurrentView = new NhanVienView();
         }
+        [RelayCommand]
+        void Quit()
+        {
+            Application.Current.Shutdown();
+        }
     }
 }

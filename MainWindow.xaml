@@ -20,6 +20,9 @@
 
             <!-- MENU -->
             <StackPanel Margin="5">
+                <Button Content="Thoát"
+Style="{StaticResource MenuButton}"
+Command="{Binding QuitCommand}"/>
                 <Button Content="Bán hàng"
         Style="{StaticResource MenuButton}"
         Command="{Binding ShowPosCommand}"/>
@@ -44,9 +47,9 @@
                 Style="{StaticResource MenuButton}"
                 Command="{Binding MoBaoCaoHangHoaCommand}"/>
                     </StackPanel>
-
                 </Expander>
             </StackPanel>
+           
 
             <!-- NỘI DUNG -->
             <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>

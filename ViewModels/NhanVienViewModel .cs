@@ -1,20 +1,24 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using BCrypt.Net;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using QL_CFE_WPF.Data;
 using QL_CFE_WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text;
-using BCrypt.Net;
 using System.Windows;
+
 
 namespace QL_CFE_WPF.ViewModels
 {
-    public partial class NhanVienViewModel : ObservableObject
+    public partial class NhanVienViewModel : ObservableObject, IDataErrorInfo
     {
+        public string Error => null;
         public ObservableCollection<NhanVien> DanhSach { get; set; } = new();
-
+        private List<NhanVien> _cacheNhanVien = new();
+      
         [ObservableProperty]
         private NhanVien selectedItem;
 
@@ -33,7 +37,55 @@ namespace QL_CFE_WPF.ViewModels
         [ObservableProperty]
         private bool trangThai = true;
         internal Action ClearPasswordRequested;
+        [ObservableProperty]
+        private bool isEditing; // true = đang sửa, false = đang thêm
+        public bool IsValid =>
+    !string.IsNullOrWhiteSpace(TenDangNhap) &&
+    !string.IsNullOrWhiteSpace(TenHienThi) &&
+    !string.IsNullOrWhiteSpace(VaiTro) &&
+    (!string.IsNullOrWhiteSpace(MatKhau));
+        void UpdateIsValid()
+        {
+            OnPropertyChanged(nameof(IsValid));
+        }
+        partial void OnTenDangNhapChanged(string value) => UpdateIsValid();
+        partial void OnMatKhauChanged(string value) => UpdateIsValid();
+        partial void OnTenHienThiChanged(string value) => UpdateIsValid();
+                partial void OnVaiTroChanged(string value) => UpdateIsValid();
 
+
+        public string this[string columnName]
+        {
+            get
+            {
+                if (columnName == nameof(TenDangNhap))
+                {
+                    if (string.IsNullOrWhiteSpace(TenDangNhap))
+                        return "Tên đăng nhập không được để trống.";
+                    if (_cacheNhanVien.Any(x =>
+                       x.TenDangNhap.ToLower() == TenDangNhap.ToLower()
+                       && (!IsEditing || x.Id != SelectedItem?.Id)))
+                        return "Tên đăng nhập đã tồn tại";
+              
+                }
+                else if (columnName == nameof(MatKhau))
+                {
+                    if (!IsEditing && string.IsNullOrWhiteSpace(MatKhau))
+                        return "Mật khẩu không được để trống.";
+                }
+                else if (columnName == nameof(TenHienThi))
+                {
+                    if (string.IsNullOrWhiteSpace(TenHienThi))
+                        return "Tên hiển thị không được để trống.";
+                }
+                else if (columnName == nameof(VaiTro))
+                {
+                    if (string.IsNullOrWhiteSpace(VaiTro))
+                        return "Vai trò không được để trống.";
+                }
+                return null;
+            }
+        }   
         public List<string> DanhSachVaiTro { get; set; } = new()
     {
         "Admin", "ThuNgan", "NhanVien"
@@ -51,6 +103,7 @@ namespace QL_CFE_WPF.ViewModels
 
             foreach (var nv in db.NhanViens)
                 DanhSach.Add(nv);
+            _cacheNhanVien = DanhSach.ToList();
         }
 
         [RelayCommand]
@@ -77,7 +130,11 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         void Sua()
         {
-            if (SelectedItem == null) return;
+            if (SelectedItem == null)
+            {
+                MessageBox.Show("Chưa chọn nhân viên");
+                return;
+            }
 
             using var db = new AppDbContext();
 
@@ -85,7 +142,11 @@ namespace QL_CFE_WPF.ViewModels
             if (nv == null) return;
 
             nv.TenDangNhap = TenDangNhap;
-            nv.MatKhau = BCrypt.Net.BCrypt.HashPassword(MatKhau);
+            // Nếu người dùng đã nhập mật khẩu mới thì cập nhật, ngược lại giữ nguyên mật khẩu cũ
+            if (!string.IsNullOrWhiteSpace(MatKhau))
+            {
+                nv.MatKhau = BCrypt.Net.BCrypt.HashPassword(MatKhau);
+            }
             nv.TenHienThi = TenHienThi;
             nv.VaiTro = VaiTro;
             nv.TrangThai = TrangThai;
@@ -122,17 +183,22 @@ namespace QL_CFE_WPF.ViewModels
             TenHienThi = value.TenHienThi;
             VaiTro = value.VaiTro;
             TrangThai = value.TrangThai;
-            MatKhau = "";
+            MatKhau = null; // không hiển thị mật khẩu cũ khi chọn nhân viên để sửa
+            IsEditing = true;
+            //cập nhậ lại IsValid khi đổi SelectedItem để cập nhật trạng thái của nút Lưu/Sửa
+           UpdateIsValid();
+
         }
 
         void ClearForm()
         {
             TenDangNhap = "";
-            MatKhau = "";
+            MatKhau = null;
             TenHienThi = "";
             VaiTro = null;
             TrangThai = true;
             ClearPasswordRequested?.Invoke();
+            IsEditing = false;
         }
     }
 }
