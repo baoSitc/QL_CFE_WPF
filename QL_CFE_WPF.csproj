@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Images\7up.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

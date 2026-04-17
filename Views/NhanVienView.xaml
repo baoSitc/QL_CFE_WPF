@@ -63,12 +63,10 @@
         materialDesign:HintAssist.Hint="Tên hiển thị"
         Margin="5"/>
 
-            <ComboBox
-        ItemsSource="{Binding DanhSachVaiTro}"
-        SelectedItem="{Binding VaiTro, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-        Style="{StaticResource MaterialDesignOutlinedComboBox}"
-        Margin="5"
-        materialDesign:HintAssist.Hint="Vai trò"/>
+            <ComboBox ItemsSource="{Binding DanhSachRole}"
+          SelectedValue="{Binding RoleId}"
+          DisplayMemberPath="TenRole"
+          SelectedValuePath="Id"/>
 
             <CheckBox Content="Đang hoạt động"
               IsChecked="{Binding TrangThai}"

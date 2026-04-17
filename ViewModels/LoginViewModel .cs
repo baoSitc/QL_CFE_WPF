@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using QL_CFE_WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,6 +36,11 @@ namespace QL_CFE_WPF.ViewModels
             if (user != null && BCrypt.Net.BCrypt.Verify(_password, user.MatKhau))
             {
                 IsLoginSuccessful = true;
+                                Session.CurrentUser = user;
+                Session.Permissions = db.RolePermissions
+                    .Where(x => x.RoleId == user.RoleId)
+                    .Select(x => x.Permission.MaQuyen)
+                    .ToList();  
                 LoginSucceeded?.Invoke();
             }
             else

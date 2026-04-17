@@ -28,6 +28,7 @@ namespace QL_CFE_WPF.Models
         public decimal? TienKhachDua { get; set; }
         public decimal? TienThoi { get; set; }
         public string? PhuongThuc { get; set; }
+        public int? NhanvienID { get; set; }
 
 
         // Navigation

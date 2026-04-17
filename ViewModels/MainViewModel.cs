@@ -113,6 +113,11 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         void ShowNhanVien()
         {
+            if (!PermissionService.Has("MANAGE_USER"))
+            {
+                MessageBox.Show("Không có quyền");
+                return;
+            }
             CurrentView = new NhanVienView();
         }
         [RelayCommand]

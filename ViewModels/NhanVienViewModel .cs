@@ -18,7 +18,8 @@ namespace QL_CFE_WPF.ViewModels
         public string Error => null;
         public ObservableCollection<NhanVien> DanhSach { get; set; } = new();
         private List<NhanVien> _cacheNhanVien = new();
-      
+        public List<Role> DanhSachRole { get; set; }
+
         [ObservableProperty]
         private NhanVien selectedItem;
 
@@ -33,6 +34,8 @@ namespace QL_CFE_WPF.ViewModels
 
         [ObservableProperty]
         private string vaiTro;
+        [ObservableProperty]
+        public int roleId;
 
         [ObservableProperty]
         private bool trangThai = true;
@@ -42,7 +45,7 @@ namespace QL_CFE_WPF.ViewModels
         public bool IsValid =>
     !string.IsNullOrWhiteSpace(TenDangNhap) &&
     !string.IsNullOrWhiteSpace(TenHienThi) &&
-    !string.IsNullOrWhiteSpace(VaiTro) &&
+    RoleId > 0 &&
     (!string.IsNullOrWhiteSpace(MatKhau));
         void UpdateIsValid()
         {
@@ -51,7 +54,7 @@ namespace QL_CFE_WPF.ViewModels
         partial void OnTenDangNhapChanged(string value) => UpdateIsValid();
         partial void OnMatKhauChanged(string value) => UpdateIsValid();
         partial void OnTenHienThiChanged(string value) => UpdateIsValid();
-                partial void OnVaiTroChanged(string value) => UpdateIsValid();
+                partial void OnRoleIdChanged(int value) => UpdateIsValid();
 
 
         public string this[string columnName]
@@ -104,6 +107,7 @@ namespace QL_CFE_WPF.ViewModels
             foreach (var nv in db.NhanViens)
                 DanhSach.Add(nv);
             _cacheNhanVien = DanhSach.ToList();
+            DanhSachRole = db.Roles.ToList();
         }
 
         [RelayCommand]
@@ -116,7 +120,7 @@ namespace QL_CFE_WPF.ViewModels
                 TenDangNhap = TenDangNhap,
                 MatKhau = BCrypt.Net.BCrypt.HashPassword(MatKhau),
                 TenHienThi = TenHienThi,
-                VaiTro = VaiTro,
+                RoleId=RoleId,
                 TrangThai = TrangThai
             };
 
@@ -148,7 +152,7 @@ namespace QL_CFE_WPF.ViewModels
                 nv.MatKhau = BCrypt.Net.BCrypt.HashPassword(MatKhau);
             }
             nv.TenHienThi = TenHienThi;
-            nv.VaiTro = VaiTro;
+            nv.RoleId = RoleId;
             nv.TrangThai = TrangThai;
             db.SaveChanges();
             MessageBox.Show("Đã cập nhật dữ liệu", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -181,7 +185,7 @@ namespace QL_CFE_WPF.ViewModels
             TenDangNhap = value.TenDangNhap;
             //MatKhau = value.MatKhau;
             TenHienThi = value.TenHienThi;
-            VaiTro = value.VaiTro;
+            RoleId = value.RoleId;
             TrangThai = value.TrangThai;
             MatKhau = null; // không hiển thị mật khẩu cũ khi chọn nhân viên để sửa
             IsEditing = true;
@@ -195,7 +199,7 @@ namespace QL_CFE_WPF.ViewModels
             TenDangNhap = "";
             MatKhau = null;
             TenHienThi = "";
-            VaiTro = null;
+            RoleId = 0;
             TrangThai = true;
             ClearPasswordRequested?.Invoke();
             IsEditing = false;

@@ -15,5 +15,6 @@ namespace QL_CFE_WPF.Models
         public string TenSP { get; set; }
         public decimal Gia { get; set; }
         public string? HinhAnh { get; set; } // 🔥 thêm dòng này
+        public bool TrangThai { get; set; } // 0: ngừng kinh doanh, 1: đang kinh doanh
     }
 }

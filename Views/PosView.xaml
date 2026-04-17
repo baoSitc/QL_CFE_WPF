@@ -171,7 +171,20 @@ Padding="5">
                                                 <!-- TEXT -->
                                                 <StackPanel VerticalAlignment="Bottom" Margin="8">
                                                     <TextBlock Text="{Binding TenSP}" Foreground="White" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center"/>
-                                                    <TextBlock Text="{Binding Gia, StringFormat={}{0:N0} đ}" Foreground="Yellow" FontWeight="Bold" TextAlignment="Center"/>
+                                                    <TextBlock Text="{Binding  TonHienThi,StringFormat={}{0:N0}}" TextAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="BlueViolet"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding TonHienThi}" Value="0">
+                                                                        <Setter Property="Foreground" Value="Red" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+
+                                                    <TextBlock Text="{Binding GiaBan, StringFormat={}{0:N0} đ}" Foreground="Yellow" FontWeight="Bold" TextAlignment="Center"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Button>
@@ -287,7 +300,7 @@ Padding="5">
                         </DataGridTemplateColumn>
 
                         <DataGridTextColumn Header="Giá"
-                                    Binding="{Binding Gia, StringFormat=N0}"
+                                    Binding="{Binding GiaBan, StringFormat=N0}"
                                     Width="100"/>
 
                         <DataGridTextColumn Header="TT" 

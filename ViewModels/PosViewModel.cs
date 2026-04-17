@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using QL_CFE_WPF.Data;
 using QL_CFE_WPF.Models;
+using QL_CFE_WPF.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,10 +17,13 @@ namespace QL_CFE_WPF.ViewModels
 {
     public partial class PosViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private ObservableCollection<SanPham> sanPhams;
-        [ObservableProperty]
-        private ObservableCollection<HoaDonTam> gioHang = new();
+        //khai báo _khoServices
+        
+        public ObservableCollection<SanPhamPosVM> SanPhams { get; set; }
+
+        public Dictionary<int, ObservableCollection<CartItem>> GioHangTheoBan
+     = new();
+        public ObservableCollection<CartItem> GioHang { get; set; } = new ObservableCollection<CartItem>();
         [ObservableProperty]
         private decimal tongTien;
         [ObservableProperty]
@@ -38,7 +42,7 @@ namespace QL_CFE_WPF.ViewModels
         private ObservableCollection<BanView> danhSachBan = new();
 
         [ObservableProperty]
-        private int? maBanDangChon;
+        private int maBanDangChon;
 
         [ObservableProperty]
         private decimal giamGia;   // tiền giảm
@@ -47,11 +51,13 @@ namespace QL_CFE_WPF.ViewModels
         private int phanTramGiam; // % giảm
         [ObservableProperty]
         private string tuKhoa;
-        public ObservableCollection<SanPham> SanPhamsLoc =>
-    new ObservableCollection<SanPham>(
+        public ObservableCollection<SanPhamPosVM> SanPhamsLoc =>
+    new ObservableCollection<SanPhamPosVM>(
         SanPhams.Where(x => string.IsNullOrEmpty(TuKhoa)
             || x.TenSP.ToLower().Contains(TuKhoa.ToLower()))
     );
+        
+       
         public PosViewModel()
         {
             LoadSanPham();
@@ -73,26 +79,53 @@ namespace QL_CFE_WPF.ViewModels
 
             var list = ds.Select(b =>
             {
-                var hd = db.HoaDons.Include(x => x.ChiTietHoaDons) // eager loading chi tiết hóa đơn để tính tổng tiền
-                    .Where(x => x.MaBan == b.MaBan && x.TrangThai == 0) //Trạng thái 0 là đang mở,1 la đã thanh toán
-                    .FirstOrDefault();
-
-                return new BanView
+                // 🔥 ưu tiên giỏ hàng memory
+                if (GioHangTheoBan.ContainsKey(b.MaBan))
                 {
-                    MaBan = b.MaBan,
-                    TenBan = b.TenBan,
-                    DangSuDung = hd != null,
-                    // 🔥 tính realtime
-                    TongTien = hd != null ? hd.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia)
-            : 0,
-                    // 🔥 QUAN TRỌNG
-                    DangChon = (maBanDangChon == b.MaBan),
-                    GioVao = hd?.GioVao,
-                    SoMon = hd != null ? hd.ChiTietHoaDons.Sum(x => x.SoLuong) : 0
-                };
+                    var gio = GioHangTheoBan[b.MaBan];
+
+                    return new BanView
+                    {
+                        MaBan = b.MaBan,
+                        TenBan = b.TenBan,
+                        DangSuDung = gio.Any(),
+
+                        TongTien = gio.Sum(x => x.SoLuong * x.Gia),
+                        SoMon = gio.Sum(x => x.SoLuong),
+
+                        DangChon = (MaBanDangChon == b.MaBan)
+                    };
+                }
+                else
+                {
+                    // 🔥 fallback DB (chỉ khi chưa load)
+                    var hd = db.HoaDons
+                        .Include(x => x.ChiTietHoaDons)
+                        .Where(x => x.MaBan == b.MaBan && x.TrangThai == 0)
+                        .FirstOrDefault();
+
+                    return new BanView
+                    {
+                        MaBan = b.MaBan,
+                        TenBan = b.TenBan,
+                        DangSuDung = hd != null,
+
+                        TongTien = hd != null
+                            ? hd.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia)
+                            : 0,
+
+                        SoMon = hd != null
+                            ? hd.ChiTietHoaDons.Sum(x => x.SoLuong)
+                            : 0,
+
+                        DangChon = (MaBanDangChon == b.MaBan),
+                        GioVao = hd?.GioVao
+                    };
+                }
             });
 
             DanhSachBan = new ObservableCollection<BanView>(list);
+
             PhanTramGiam = 0;
         }
         //Gop ban
@@ -188,54 +221,99 @@ namespace QL_CFE_WPF.ViewModels
         void ChonBan(object? obj)
         {
             if (obj is not BanView ban) return;
-            // 🔥 lưu lại bàn đang chọn
+
             MaBanDangChon = ban.MaBan;
-            // reset chọn
+
             foreach (var b in DanhSachBan)
                 b.DangChon = false;
 
             ban.DangChon = true;
 
-            using var db = new Data.AppDbContext();
+            // 🔥 nếu chưa có giỏ → tạo + load DB 1 lần
+            if (!GioHangTheoBan.ContainsKey(MaBanDangChon))
+            {
+                GioHangTheoBan[MaBanDangChon] = new ObservableCollection<CartItem>();
+
+                using var db = new AppDbContext();
+
+                var hd = db.HoaDons
+                    .Include(x => x.ChiTietHoaDons)
+                    .ThenInclude(ct => ct.SanPham)
+                    .FirstOrDefault(x => x.MaBan == ban.MaBan && x.TrangThai == 0);
+
+                if (hd != null)
+                {
+                    hoaDonHienTai = hd;
+
+                    foreach (var ct in hd.ChiTietHoaDons)
+                    {
+                        GioHangTheoBan[MaBanDangChon].Add(new CartItem
+                        {
+                            SanPhamId = ct.MaSP,
+                            TenSP = ct.SanPham.TenSP,
+                            Gia = ct.Gia,
+                            SoLuong = ct.SoLuong
+                        });
+                    }
+                }
+                else
+                {
+                    // hỏi tạo hóa đơn mới
+                    if (MessageBox.Show($"Bàn {ban.TenBan} chưa có hóa đơn. Tạo mới?",
+                        "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                    {
+                        MaBanDangChon = 0;
+                        ban.DangChon = false;
+                        return;
+                    }
+
+                    var newHd = new HoaDon
+                    {
+                        MaBan = ban.MaBan,
+                        Ngay = DateTime.Now,
+                        TrangThai = 0,
+                        NhanvienID = Session.CurrentUser.Id
+                    };
+
+                    db.HoaDons.Add(newHd);
+                    db.SaveChanges();
+
+                    hoaDonHienTai = newHd;
+                }
+            }
+
+            // 🔥 switch giỏ (KHÔNG load lại DB nữa)
+            GioHang = GioHangTheoBan[MaBanDangChon];
+
+            OnPropertyChanged(nameof(GioHang));
+
+            CapNhatTonHienThi();
+
+            LoadDanhSachBan();
+            CalculateTotal();
+        }
+
+        void LoadGioHangTuDB(int banId)
+        {
+            using var db = new AppDbContext();
 
             var hd = db.HoaDons
                 .Include(x => x.ChiTietHoaDons)
-                    .ThenInclude(ct => ct.SanPham)
-                .FirstOrDefault(x => x.MaBan == ban.MaBan && x.TrangThai == 0);//Trạng thái 0 là đang mở,1 la đã thanh toán
+                .ThenInclude(ct => ct.SanPham)
+                .FirstOrDefault(x => x.MaBan == banId && x.TrangThai == 0);
 
-            if (hd != null)
+            if (hd == null) return;
+
+            foreach (var ct in hd.ChiTietHoaDons)
             {
-                hoaDonHienTai = hd;
-                LoadGioHang(hd);
-            }
-            else
-            {
-                //xác định bàn này chưa có hóa đơn nào đang mở, tạo mới
-                //hỏi khách hàng con muốn tạo hóa đơn mới cho bàn này không
-                if (MessageBox.Show($"Bàn {ban.TenBan} hiện chưa có hóa đơn nào. Bạn có muốn tạo mới?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                GioHangTheoBan[banId].Add(new CartItem
                 {
-                    //nếu không tạo mới thì reset lại bàn đang chọn
-                    MaBanDangChon = null;
-                    ban.DangChon = false;
-
-                    return;
-                }
-
-                var newHd = new HoaDon
-                {
-                    MaBan = ban.MaBan,
-                    Ngay = DateTime.Now,
-                    TrangThai = 0 // 0: đang mở, 1: đã thanh toán
-                };
-
-                db.HoaDons.Add(newHd);
-                db.SaveChanges();
-
-                hoaDonHienTai = newHd;
-                GioHang.Clear();
+                    SanPhamId = ct.MaSP,
+                    TenSP = ct.SanPham.TenSP,
+                    Gia = ct.Gia,
+                    SoLuong = ct.SoLuong
+                });
             }
-
-            LoadDanhSachBan(); // refresh lại tiền + màu
         }
 
         [RelayCommand]
@@ -257,7 +335,7 @@ namespace QL_CFE_WPF.ViewModels
             else
             {
                 //xóa gio hàng cũ nếu có
-                gioHang.Clear();
+                GioHang.Clear();
                 //Tạo hóa đơn mới cho bàn này
                 var hoaDon = new HoaDon
                 {
@@ -265,7 +343,9 @@ namespace QL_CFE_WPF.ViewModels
                     Ngay = DateTime.Now,
                     TongTien = 0,
                     TrangThai = 0, // 0: đang mở, 1: đã thanh toán
-                    GioVao = DateTime.Now
+                    GioVao = DateTime.Now,
+                    NhanvienID = Session.CurrentUser.Id // 🔥 gán nhân viên hiện tại vào hóa đơn
+
                 };
                 db.HoaDons.Add(hoaDon);
                 db.SaveChanges();
@@ -278,127 +358,146 @@ namespace QL_CFE_WPF.ViewModels
         void LoadSanPham()
         {
             using var db = new Data.AppDbContext();
-            SanPhams = new ObservableCollection<SanPham>(db.SanPhams.OrderBy(x => x.TenSP).ToList());
+
+            int khoId = 1; // kho chính
+
+            SanPhams = new ObservableCollection<SanPhamPosVM>(
+                (from sp in db.SanPhams
+                 join tk in db.TonKhos
+                     on sp.MaSP equals tk.SanPhamId into gj
+                 from tk in gj.DefaultIfEmpty()
+                 where sp.TrangThai == true
+                 orderby sp.TenSP
+                 select new SanPhamPosVM
+                 {
+                     Id = sp.MaSP,
+                     TenSP = sp.TenSP,
+                     GiaBan = sp.Gia,
+                     HinhAnh = sp.HinhAnh,
+                     TonKho = tk != null && tk.KhoId == khoId ? tk.SoLuong : 0
+                 }).ToList()
+            );
         }
 
         //thêm sản phẩm vào giỏ hàng
         [RelayCommand]
-        void AddToCart(SanPham sp)
+        void AddToCart(SanPhamPosVM sp)
         {
-            if (sp == null || hoaDonHienTai == null) return;
+            if (sp == null) return;
 
-            using var db = new Data.AppDbContext();
+            var item = GioHang.FirstOrDefault(x => x.SanPhamId == sp.Id);
 
-            // kiểm tra đã có món chưa
-            var ct = db.ChiTietHoaDons
-                .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == sp.MaSP);
+            int soLuongTrongGio = item?.SoLuong ?? 0;
 
-            if (ct != null)
+            if (soLuongTrongGio >= sp.TonKho)
             {
-                ct.SoLuong += 1;
+                MessageBox.Show("Không đủ hàng");
+                return;
             }
-            else
-            {
-                db.ChiTietHoaDons.Add(new ChiTietHoaDon
-                {
-                    MaHD = hoaDonHienTai.MaHD,
-                    MaSP = sp.MaSP,
-                    SoLuong = 1,
-                    Gia = sp.Gia,
-
-                });
-
-            }
-
-            db.SaveChanges();
-
-            // reload lại UI
-            var hd = db.HoaDons
-                .Include(x => x.ChiTietHoaDons)
-                    .ThenInclude(ct => ct.SanPham)
-                .First(x => x.MaHD == hoaDonHienTai.MaHD);
-
-            hoaDonHienTai = hd;
-            LoadGioHang(hd);
-            var item = GioHang.FirstOrDefault(x => x.MaSP == sp.MaSP);
 
             if (item != null)
             {
-                item.IsHighlight = true;
-
-                // 🔥 tắt sau 300ms
-                Task.Run(async () =>
+                item.SoLuong += 1;
+            }
+            else
+            {
+                item = new CartItem
                 {
-                    await Task.Delay(600);
+                    SanPhamId = sp.Id,
+                    TenSP = sp.TenSP,
+                    Gia = sp.GiaBan,
+                    SoLuong = 1
+                };
 
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        item.IsHighlight = false;
-                    });
-                });
+                GioHang.Add(item);
             }
+
+            // 🔥 update tồn hiển thị
+            CapNhatTonHienThi();
+
+            // 🔥 highlight
+            //item.IsHighlight = true;
+
+            //Task.Run(async () =>
+            //{
+            //    await Task.Delay(500);
+
+            //    Application.Current.Dispatcher.Invoke(() =>
+            //    {
+            //        item.IsHighlight = false;
+            //    });
+            //});  
+
+            // 🔥 update tổng tiền
+            OnPropertyChanged(nameof(TongTien));
+            OnPropertyChanged(nameof(TongTienHienTai));
+            CalculateTotal();
 
 
         }
-        [RelayCommand]
-        void TangSoLuong(object? obj)
+
+        private void CapNhatTonHienThi()
         {
-            if (obj is not HoaDonTam item) return;
-
-            using var db = new Data.AppDbContext();
-
-            var ct = db.ChiTietHoaDons
-                .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == item.MaSP);
-
-            if (ct != null)
             {
-                ct.SoLuong += 1;
+                foreach (var sp 
+                    in SanPhams)
+                {
+                    // 🔥 tổng số lượng tất cả bàn
+                    var tongSoLuong = GioHangTheoBan
+                        .SelectMany(x => x.Value)
+                        .Where(x => x.SanPhamId == sp.Id)
+                        .Sum(x => x.SoLuong);
 
-                db.SaveChanges();
+                    sp.SoLuongDangChon = tongSoLuong;
+                }
+            }
+            OnPropertyChanged(nameof(SanPhamsLoc));
+
+        }
+
+        [RelayCommand]
+        public void TangSoLuong(CartItem item)
+        {
+            var sp = SanPhams.First(x => x.Id == item.SanPhamId);
+
+            if (item.SoLuong >= sp.TonKho)
+            {
+                MessageBox.Show("Không đủ hàng");
+                return;
             }
 
-            LoadLaiHoaDon();
+            item.SoLuong++;
+            CapNhatTonHienThi();
+            OnPropertyChanged(nameof(TongTien));
+            OnPropertyChanged(nameof(TongTienHienTai));
+            CalculateTotal();
         }
         [RelayCommand]
-        void GiamSoLuong(object? obj)
+        public void GiamSoLuong(CartItem item)
         {
-            if (obj is not HoaDonTam item) return;
+            item.SoLuong--;
 
-            using var db = new Data.AppDbContext();
-
-            var ct = db.ChiTietHoaDons
-                .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == item.MaSP);
-
-            if (ct != null)
-            {
-
-                ct.SoLuong -= 1;
-
-                if (ct.SoLuong <= 0)
-                    db.ChiTietHoaDons.Remove(ct);
-
-                db.SaveChanges();
-            }
-
-            LoadLaiHoaDon();
+            if (item.SoLuong <= 0)
+                GioHang.Remove(item);
+            CapNhatTonHienThi();
+            OnPropertyChanged(nameof(TongTien));
+            OnPropertyChanged(nameof(TongTienHienTai));
+            CalculateTotal();
         }
         [RelayCommand]
-        void XoaMon(object? obj)
+        void XoaMon(CartItem item)
         {
-            if (obj is not HoaDonTam item) return;
+           
 
-            using var db = new Data.AppDbContext();
+            item.SoLuong = 0;
 
-            var ct = db.ChiTietHoaDons
-                .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == item.MaSP);
+            if (item.SoLuong <= 0)
+                GioHang.Remove(item);
+            CapNhatTonHienThi();
+            OnPropertyChanged(nameof(TongTien));
+            OnPropertyChanged(nameof(TongTienHienTai));
+            CalculateTotal();
 
-            if (ct != null)
-            {
-                db.ChiTietHoaDons.Remove(ct);
-                db.SaveChanges();
-            }
-
-            LoadLaiHoaDon();
         }
         void LoadLaiHoaDon()
         {
@@ -435,23 +534,21 @@ namespace QL_CFE_WPF.ViewModels
         //load gio hang
         void LoadGioHang(HoaDon hd)
         {
-            using var db = new Data.AppDbContext();
 
-            gioHang.Clear();
+            GioHang.Clear();
 
-            foreach (var ct in hd.ChiTietHoaDons.OrderBy(x => x.SanPham.TenSP))
+            foreach (var ct in hd.ChiTietHoaDons)
             {
-                // var sp = db.SanPhams.Find(ct.MaSP);
-
-                gioHang.Add(new HoaDonTam
+                GioHang.Add(new CartItem
                 {
-                    MaSP = ct.MaSP,
-                    TenSP = ct.SanPham?.TenSP,
+                    SanPhamId = ct.MaSP,
+                    TenSP = ct.SanPham.TenSP,
                     Gia = ct.Gia,
                     SoLuong = ct.SoLuong
-
                 });
             }
+
+            CapNhatTonHienThi();
             CalculateTotal();
         }
         void CalculateTotal()
@@ -469,7 +566,7 @@ namespace QL_CFE_WPF.ViewModels
         }
         //xóa sản phẩm khỏi giỏ hàng
         [RelayCommand]
-        void RemoveFromCart(HoaDonTam item)
+        void RemoveFromCart(CartItem item)
         {
             if (item == null) return;
             GioHang.Remove(item);
@@ -495,29 +592,71 @@ namespace QL_CFE_WPF.ViewModels
             };
             vm.OnThanhToanThanhCong = () =>
             {
-            var hoaDon = db.HoaDons
-       .Include(x => x.ChiTietHoaDons).ThenInclude(ct => ct.SanPham)
-       .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD);
+                var hoaDon = db.HoaDons
+            .Include(x => x.ChiTietHoaDons)
+            .ThenInclude(ct => ct.SanPham)
+            .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD);
+                // 🔥 SYNC giỏ hàng → DB
+                db.ChiTietHoaDons.RemoveRange(hoaDon.ChiTietHoaDons);
+                foreach (var item in GioHang)
+                {
+                    db.ChiTietHoaDons.Add(new ChiTietHoaDon
+                    {
+                        MaHD = hoaDon.MaHD,
+                        MaSP = item.SanPhamId,
+                        SoLuong = item.SoLuong,
+                        Gia = item.Gia
+                    });
+                }
+
+                
                 hoaDon.TrangThai = 1; // đã thanh toán
                 hoaDon.NgayThanhToan = DateTime.Now;
                 hoaDon.TienKhachDua = vm.TienKhachDua;
                 hoaDon.TienThoi = vm.TienThoi;
-                hoaDon.PhuongThuc = vm.PhuongThuc;               
+                hoaDon.PhuongThuc = vm.PhuongThuc;             
 
                 hoaDon.GioRa = DateTime.Now;
             hoaDon.TongTien = TongTienHienTai;
             hoaDon.GiamGia = GiamGia;
             db.SaveChanges();
-            TongTien = 0;
-            InBill(hoaDon);
 
-            // reset UI
-            GioHang.Clear();
-            hoaDonHienTai = null;
-            MaBanDangChon = null;
+
+            TongTien = 0;
+                db.Entry(hoaDon).Collection(x => x.ChiTietHoaDons).Load();
+                var hoaDonIn = db.HoaDons
+                    .Include(x => x.ChiTietHoaDons)
+                    .ThenInclude(ct => ct.SanPham)
+                    .First(x => x.MaHD == hoaDon.MaHD);
+
+
+                InBill(hoaDonIn);
+                //tính hàng xuất kho
+                // 🔥 xuất kho (cùng context)
+                var service = new KhoService(db);
+
+                service.XuatKho(
+                    GioHang.Select(x => new XuatKhoItem
+                    {
+                        SanPhamId = x.SanPhamId,
+                        SoLuong = x.SoLuong
+                    }).ToList(),
+                    Session.CurrentUser.Id,
+                    1,
+                    "BAN_HANG"
+                );
+
+
+
+                // reset UI
+                GioHangTheoBan.Remove(MaBanDangChon);
+                GioHang.Clear();
+                hoaDonHienTai = null;
+            MaBanDangChon = 0;
             TongTienHienTai = 0;
             GiamGia = 0;
             LoadDanhSachBan();
+                LoadSanPham();
                 win.Close();
             };
             win.ShowDialog();
