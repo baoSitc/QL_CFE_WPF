@@ -16,8 +16,9 @@ namespace QL_CFE_WPF.ViewModels
         public decimal TonKho { get; set; }
 
         // dùng cho realtime khi chọn
-        public decimal TonHienThi => TonKho - SoLuongDangChon;
-        public int SoLuongDangChon { get; set; }
+        //public decimal TonHienThi => TonKho - SoLuongDangChon;
+        public decimal TonHienThi { get; set; } // 🔥 thay đổi dòng này
+        public decimal SoLuongDangChon { get; set; }
         
 
     }

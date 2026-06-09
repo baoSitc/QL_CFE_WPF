@@ -3,47 +3,246 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:QL_CFE_WPF.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.DataContext>
-        <local:MainViewModel/>
-    </UserControl.DataContext>
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <!-- FORM -->
-        <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
-            <TextBox Width="150"
-                 Margin="5"
-                 Text="{Binding TenSP, UpdateSourceTrigger=PropertyChanged}" />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-            <TextBox Width="100"
-                 Margin="5"
-                 Text="{Binding Gia, UpdateSourceTrigger=PropertyChanged}" />
+        <!-- ================= LEFT ================= -->
+        <Border Grid.Column="0"
+                BorderBrush="#DDD"
+                BorderThickness="1"
+                CornerRadius="5">
 
-            <Button Content="Thêm" Command="{Binding AddSanPhamCommand}" Margin="5"/>
-            <Button Content="Sửa" Command="{Binding UpdateSanPhamCommand}" Margin="5"/>
-            <Button Content="Xóa"
-                Command="{Binding RemoveSanPhamCommand}"
-                CommandParameter="{Binding SelectedSanPham}"
-                Margin="5"/>
-        </StackPanel>
+            <Grid>
 
-        <!-- GRID -->
-        <DataGrid Grid.Row="1"
-              ItemsSource="{Binding SanPhams}"
-              SelectedItem="{Binding SelectedSanPham}"
-              AutoGenerateColumns="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Mã" Binding="{Binding MaSP}"/>
-                <DataGridTextColumn Header="Tên SP" Binding="{Binding TenSP}"/>
-                <DataGridTextColumn Header="Giá" Binding="{Binding Gia}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                <!-- toolbar -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="5">
+
+                    <Button Content="➕"
+                            Width="40"
+                            Height="35"
+                            Command="{Binding AddNhomCommand}"/>
+
+                    <Button Content="✏"
+                            Width="40"
+                            Height="35"
+                            Margin="5,0,0,0"
+                            Command="{Binding EditNhomCommand}"/>
+
+                    <Button Content="🗑"
+                            Width="40"
+                            Height="35"
+                            Margin="5,0,0,0"
+                            Command="{Binding DeleteNhomCommand}"/>
+
+                </StackPanel>
+                <!-- panel add -->
+
+                <Border Grid.Row="1"
+            Margin="5"
+            Padding="5"
+            BorderBrush="#DDD"
+            BorderThickness="1">
+
+                    <Border.Style>
+                        <Style TargetType="Border">
+
+                            <Setter Property="Visibility"
+                        Value="Collapsed"/>
+
+                            <Style.Triggers>
+
+                                <DataTrigger Binding="{Binding IsAddingNhom}"
+                                 Value="True">
+
+                                    <Setter Property="Visibility"
+                                Value="Visible"/>
+
+                                </DataTrigger>
+
+                            </Style.Triggers>
+
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel>
+
+                        <TextBlock Text="Tên nhóm"
+                       Margin="0,0,0,5"/>
+
+                        <TextBox Text="{Binding TenNhomMoi,
+                                    UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <StackPanel Orientation="Horizontal"
+                        Margin="0,5,0,0">
+
+                            <Button Content="Lưu"
+                        Width="80"
+                        Command="{Binding SaveNhomCommand}"/>
+
+                            <Button Content="Hủy"
+                        Width="80"
+                        Margin="5,0,0,0"
+                        Command="{Binding CancelAddNhomCommand}"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- tree -->
+                <TreeView Grid.Row="2"
+                          Margin="5"
+                          ItemsSource="{Binding RootNhomHangs}"
+                          SelectedItemChanged="TreeView_SelectedItemChanged">
+
+                    <TreeView.ItemTemplate>
+
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal">
+
+                                <materialDesign:PackIcon
+    Kind="{Binding IconKind}"
+    Foreground="{Binding IconColor}"
+    Width="18"
+    Height="18"
+    Margin="0,0,5,0"/>
+
+                                <TextBlock Text="{Binding TenNhom}"
+                   VerticalAlignment="Center"/>
+
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+
+                    </TreeView.ItemTemplate>
+
+                </TreeView>
+
+            </Grid>
+
+        </Border>
+
+        <!-- ================= RIGHT ================= -->
+
+        <Border Grid.Column="2"
+                BorderBrush="#DDD"
+                BorderThickness="1"
+                CornerRadius="5">
+
+            <Grid Margin="10">
+
+                <Grid.RowDefinitions>
+
+                    <RowDefinition Height="Auto"/>
+
+                    <RowDefinition Height="Auto"/>
+
+                    <RowDefinition Height="*"/>
+
+                </Grid.RowDefinitions>
+
+                <!-- toolbar -->
+
+                <StackPanel Orientation="Horizontal">
+
+                    <Button Content="➕ Thêm"
+                            Width="100"
+                            Height="35"
+                            Command="{Binding AddSanPhamCommand}"/>
+
+                    <Button Content="💾 Lưu"
+                            Width="100"
+                            Height="35"
+                            Margin="5,0"
+                            Command="{Binding UpdateSanPhamCommand}"/>
+
+                    <Button Content="🗑 Xóa"
+                            Width="100"
+                            Height="35"
+                            Command="{Binding DeleteSanPhamCommand}"/>
+
+                </StackPanel>
+
+                <!-- Search -->
+
+                <materialDesign:PackIcon Kind="Magnify" Grid.Row="1"
+                             Width="24"
+                             Height="24"
+                             Margin="0,0,10,0"
+                             VerticalAlignment="Center"/>
+
+                <TextBox  Grid.Row="1"   Margin="0,0,15,0"
+                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                  Text="{Binding TuKhoa,
+                UpdateSourceTrigger=PropertyChanged}"
+             materialDesign:HintAssist.Hint="Tìm kiếm..."/>
+
+
+
+                <!-- Grid -->
+
+                <DataGrid Grid.Row="2"
+                          AutoGenerateColumns="False"
+                          ItemsSource="{Binding SanPhams}"
+                          SelectedItem="{Binding SelectedSanPham}">
+
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="Mã"
+                                            Width="80"
+                                            Binding="{Binding MaSP}" IsReadOnly="True"/>
+
+                        <DataGridTextColumn Header="Tên Sản Phẩm"
+Width="*">
+                            <DataGridTextColumn.Binding>
+                                <Binding Path="TenSP"
+             Mode="TwoWay"
+             UpdateSourceTrigger="PropertyChanged"
+             StringFormat="N0"/>
+                            </DataGridTextColumn.Binding>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Giá bán"
+                    Width="120">
+                            <DataGridTextColumn.Binding>
+                                <Binding Path="Gia"
+                                 Mode="TwoWay"
+                                 UpdateSourceTrigger="PropertyChanged"
+                                 StringFormat="N0"/>
+                            </DataGridTextColumn.Binding>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Nhóm"
+                                            Width="150"
+                                            Binding="{Binding NhomHang.TenNhom}" IsReadOnly="True"/>
+
+                        <DataGridTextColumn Header="Tồn"
+                                            Width="100"
+                                            Binding="{Binding TonKho}"/>
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+            </Grid>
+
+        </Border>
+
     </Grid>
 </UserControl>

@@ -62,7 +62,40 @@ namespace QL_CFE_WPF.ViewModels
         {
             LoadSanPham();
             LoadDanhSachBan();
+            LoadSauLogin();
         }
+
+        void LoadSauLogin()
+        {
+            using var db = new AppDbContext();
+
+            var hoaDons = db.HoaDons
+                .Where(x => x.TrangThai == 0)
+                .ToList();
+
+            foreach (var hd in hoaDons)
+            {
+                var ct = db.ChiTietHoaDons
+                    .Include(x => x.SanPham)
+                    .Where(x => x.MaHD == hd.MaHD)
+                    .ToList();
+
+                GioHangTheoBan[hd.MaBan] = new ObservableCollection<CartItem>(
+                    ct.Select(x => new CartItem
+                    {
+                        SanPhamId = x.MaSP,
+                        SoLuong = x.SoLuong,
+                        Gia = x.Gia,
+                        TenSP=x.SanPham.TenSP
+                    })
+                //Load gio hang từ giuban (nếu có), Trạng thái 0 là còn giữ, 1 là đã dùng, 2 là hết hạn
+
+
+                );
+            }
+            CapNhatTonHienThi();
+        }
+
         partial void OnTuKhoaChanged(string value)
         {
             OnPropertyChanged(nameof(SanPhamsLoc));
@@ -228,18 +261,20 @@ namespace QL_CFE_WPF.ViewModels
                 b.DangChon = false;
 
             ban.DangChon = true;
+            using var db = new AppDbContext();
+
+                var hd = db.HoaDons
+                    .Include(x => x.ChiTietHoaDons)
+                    .ThenInclude(ct => ct.SanPham)
+                    .FirstOrDefault(x => x.MaBan == ban.MaBan && x.TrangThai == 0);
+            if (hd != null) hoaDonHienTai = hd;
 
             // 🔥 nếu chưa có giỏ → tạo + load DB 1 lần
             if (!GioHangTheoBan.ContainsKey(MaBanDangChon))
             {
                 GioHangTheoBan[MaBanDangChon] = new ObservableCollection<CartItem>();
 
-                using var db = new AppDbContext();
-
-                var hd = db.HoaDons
-                    .Include(x => x.ChiTietHoaDons)
-                    .ThenInclude(ct => ct.SanPham)
-                    .FirstOrDefault(x => x.MaBan == ban.MaBan && x.TrangThai == 0);
+               
 
                 if (hd != null)
                 {
@@ -384,33 +419,51 @@ namespace QL_CFE_WPF.ViewModels
         void AddToCart(SanPhamPosVM sp)
         {
             if (sp == null) return;
-
-            var item = GioHang.FirstOrDefault(x => x.SanPhamId == sp.Id);
-
-            int soLuongTrongGio = item?.SoLuong ?? 0;
-
-            if (soLuongTrongGio >= sp.TonKho)
+            var giuHangService = new GiuHangService(new AppDbContext());
+            //Giữ hàng trước
+            bool ok=giuHangService.TryReserve(sp.Id, 1, MaBanDangChon, hoaDonHienTai.MaHD);
+            if(!ok)
             {
                 MessageBox.Show("Không đủ hàng");
                 return;
             }
+            // 🔥 2. lưu vào ChiTietHoaDon (QUAN TRỌNG)
+            var db = new AppDbContext();
+            var ct = db.ChiTietHoaDons
+        .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == sp.Id);
 
-            if (item != null)
-            {
-                item.SoLuong += 1;
-            }
+            if (ct != null)
+                ct.SoLuong += 1;
             else
             {
-                item = new CartItem
+                db.ChiTietHoaDons.Add(new ChiTietHoaDon
+                {
+                    MaHD = hoaDonHienTai.MaHD,
+                    MaSP = sp.Id,
+                    SoLuong = 1,
+                    Gia = sp.GiaBan                  
+                });
+            }
+
+            db.SaveChanges();
+
+            //cập nhật giỏ hàng memory
+            var itemGioHang = GioHang.FirstOrDefault(x => x.SanPhamId == sp.Id);
+            if(itemGioHang != null)
+                itemGioHang.SoLuong += 1;
+            else
+            {
+                GioHang.Add(new CartItem
                 {
                     SanPhamId = sp.Id,
                     TenSP = sp.TenSP,
                     Gia = sp.GiaBan,
                     SoLuong = 1
-                };
-
-                GioHang.Add(item);
+                });
             }
+
+
+            
 
             // 🔥 update tồn hiển thị
             CapNhatTonHienThi();
@@ -438,19 +491,18 @@ namespace QL_CFE_WPF.ViewModels
 
         private void CapNhatTonHienThi()
         {
-            {
-                foreach (var sp 
-                    in SanPhams)
-                {
-                    // 🔥 tổng số lượng tất cả bàn
-                    var tongSoLuong = GioHangTheoBan
-                        .SelectMany(x => x.Value)
-                        .Where(x => x.SanPhamId == sp.Id)
-                        .Sum(x => x.SoLuong);
 
-                    sp.SoLuongDangChon = tongSoLuong;
-                }
+            using var db = new AppDbContext();
+
+            var giuService = new GiuHangService(db);
+
+            foreach (var sp in SanPhams)
+            {
+                var reserved = giuService.GetReserved(sp.Id);
+
+                sp.TonHienThi = sp.TonKho - reserved;  
             }
+
             OnPropertyChanged(nameof(SanPhamsLoc));
 
         }
@@ -460,13 +512,50 @@ namespace QL_CFE_WPF.ViewModels
         {
             var sp = SanPhams.First(x => x.Id == item.SanPhamId);
 
-            if (item.SoLuong >= sp.TonKho)
+            var giuHangService = new GiuHangService(new AppDbContext());
+            //Giữ hàng trước
+            bool ok = giuHangService.TryReserve(sp.Id, 1, MaBanDangChon, hoaDonHienTai.MaHD);
+            if (!ok)
             {
                 MessageBox.Show("Không đủ hàng");
                 return;
             }
+            // 🔥 2. lưu vào ChiTietHoaDon (QUAN TRỌNG)
+            var db = new AppDbContext();
+            var ct = db.ChiTietHoaDons
+        .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == sp.Id);
 
-            item.SoLuong++;
+            if (ct != null)
+                ct.SoLuong += 1;
+            else
+            {
+                db.ChiTietHoaDons.Add(new ChiTietHoaDon
+                {
+                    MaHD = hoaDonHienTai.MaHD,
+                    MaSP = sp.Id,
+                    SoLuong = 1,
+                    Gia = sp.GiaBan
+                });
+            }
+
+            db.SaveChanges();
+            //cập nhật giỏ hàng memory
+            var itemGioHang = GioHang.FirstOrDefault(x => x.SanPhamId == sp.Id);
+            if (itemGioHang != null)
+                itemGioHang.SoLuong += 1;
+            else
+            {
+                GioHang.Add(new CartItem
+                {
+                    SanPhamId = sp.Id,
+                    TenSP = sp.TenSP,
+                    Gia = sp.GiaBan,
+                    SoLuong = 1
+                });
+            }
+
+
+            //  item.SoLuong++;
             CapNhatTonHienThi();
             OnPropertyChanged(nameof(TongTien));
             OnPropertyChanged(nameof(TongTienHienTai));
@@ -475,10 +564,27 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         public void GiamSoLuong(CartItem item)
         {
-            item.SoLuong--;
+            var giuHangService = new GiuHangService(new AppDbContext());
+            using var db = new AppDbContext();
+            var ct = db.ChiTietHoaDons
+                .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD && x.MaSP == item.SanPhamId);
+            if(ct == null) return;
 
-            if (item.SoLuong <= 0)
+
+            if (item.SoLuong >1)
+            {
+                item.SoLuong--;
+                ct.SoLuong -= 1;
+
+            }
+            else {
                 GioHang.Remove(item);
+                db.ChiTietHoaDons.Remove(ct);
+            }
+            giuHangService.Release(item.SanPhamId, hoaDonHienTai.MaHD, 1);
+
+            db.SaveChanges();
+
             CapNhatTonHienThi();
             OnPropertyChanged(nameof(TongTien));
             OnPropertyChanged(nameof(TongTienHienTai));
@@ -486,11 +592,9 @@ namespace QL_CFE_WPF.ViewModels
         }
         [RelayCommand]
         void XoaMon(CartItem item)
-        {
-           
+        {         
 
             item.SoLuong = 0;
-
             if (item.SoLuong <= 0)
                 GioHang.Remove(item);
             CapNhatTonHienThi();
@@ -624,6 +728,7 @@ namespace QL_CFE_WPF.ViewModels
 
             TongTien = 0;
                 db.Entry(hoaDon).Collection(x => x.ChiTietHoaDons).Load();
+
                 var hoaDonIn = db.HoaDons
                     .Include(x => x.ChiTietHoaDons)
                     .ThenInclude(ct => ct.SanPham)
@@ -646,6 +751,14 @@ namespace QL_CFE_WPF.ViewModels
                     "BAN_HANG"
                 );
 
+                var giu=db.GiuHangs.Where(x => x.MaBan == MaBanDangChon 
+                && x.HoaDonId == hoaDon.MaHD && x.TrangThai == 0).ToList();
+
+                foreach (var g in giu)
+                {
+                    g.TrangThai = 1; // đã dùng
+                }
+                db.SaveChanges();
 
 
                 // reset UI

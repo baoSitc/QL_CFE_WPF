@@ -21,6 +21,8 @@ namespace QL_CFE_WPF.Data
         public DbSet<Models.PhieuXuat> PhieuXuats { get; set; }
         public DbSet<Models.PhieuXuatCT> PhieuXuatCTs { get; set; }
         public DbSet<Models.Kho> Khos { get; set; }
+        public DbSet<Models.GiuHang> GiuHangs { get; set; }
+        public DbSet<Models.NhomHang> NhomHangs { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

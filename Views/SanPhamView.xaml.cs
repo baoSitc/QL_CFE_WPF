@@ -1,5 +1,9 @@
-﻿using System;
+﻿using QL_CFE_WPF.Data;
+using QL_CFE_WPF.Models;
+using QL_CFE_WPF.ViewModels;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +25,26 @@ namespace QL_CFE_WPF
         public SanPhamView()
         {
             InitializeComponent();
+            DataContext = new SanPhamViewModel();
         }
+        private void TreeView_SelectedItemChanged(
+    object sender,
+    RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (DataContext is SanPhamViewModel vm
+                && e.NewValue is NhomHangTreeVM nhom)
+            {
+                vm.SelectedNhomHang=new NhomHang
+                {
+                    Id = nhom.Id,
+                    TenNhom = nhom.TenNhom,
+                    ParentId = nhom.ParentId
+                };
+                vm.SelectedNhomHangId = nhom.Id;
+              
+                vm.LoadSanPhamTheoNhom();
+            }
+        }
+       
     }
 }
