@@ -200,7 +200,9 @@ namespace QL_CFE_WPF.ViewModels
             {
                 TenSP = "Chưa có",
                 Gia = Gia,
-                NhomHangId = SelectedNhomHangId
+                GiaVIP = GiaVIP,
+                NhomHangId = SelectedNhomHangId,
+                TrangThai = true
             };
             using var db = new Data.AppDbContext();
             db.SanPhams.Add(newSanPham);
@@ -216,10 +218,19 @@ namespace QL_CFE_WPF.ViewModels
             db.SaveChanges();
             SanPhams.Remove(sp);
         }
+     
+      
+
+
+
         [ObservableProperty]
         private string tenSP;
         [ObservableProperty]
         private decimal gia;
+        [ObservableProperty]
+        private decimal giaVIP;        
+        public bool TrangThai { get; set; }
+
         [ObservableProperty]
         private SanPham selectedSanPham;
         [RelayCommand]
@@ -232,7 +243,9 @@ namespace QL_CFE_WPF.ViewModels
             {
                 sp.TenSP = SelectedSanPham.TenSP;
                 sp.Gia = SelectedSanPham.Gia;
+                sp.GiaVIP = SelectedSanPham.GiaVIP;
                 sp.NhomHangId = SelectedNhomHangId;
+                sp.TrangThai = SelectedSanPham.TrangThai;
                 db.SaveChanges();
                 LoadSanPhamTheoNhom();
                 //LoadData();
@@ -249,6 +262,8 @@ namespace QL_CFE_WPF.ViewModels
             {
                 TenSP = value.TenSP;
                 Gia = value.Gia;
+                GiaVIP = value.GiaVIP;
+               // trangThai = value.TrangThai ? 1 : 0;
             }
         }
         //load icon cho treeview

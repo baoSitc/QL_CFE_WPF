@@ -218,7 +218,7 @@ Width="*">
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Giá bán"
+                        <DataGridTextColumn Header="Giá thường"
                     Width="120">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="Gia"
@@ -228,13 +228,21 @@ Width="*">
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Nhóm"
-                                            Width="150"
-                                            Binding="{Binding NhomHang.TenNhom}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Giá VIP"
+                                    Width="120">
+                            <DataGridTextColumn.Binding>
+                                <Binding Path="GiaVIP"
+             Mode="TwoWay"
+             UpdateSourceTrigger="PropertyChanged"
+             StringFormat="N0"/>
+                            </DataGridTextColumn.Binding>
+                        </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Tồn"
-                                            Width="100"
-                                            Binding="{Binding TonKho}"/>
+
+
+
+                        <DataGridCheckBoxColumn Header="Đang bán"
+                        Binding="{Binding TrangThai}" />
 
                     </DataGrid.Columns>
 

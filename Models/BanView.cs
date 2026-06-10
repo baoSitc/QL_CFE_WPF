@@ -22,5 +22,7 @@ namespace QL_CFE_WPF.Models
         private DateTime? gioVao;
         [ObservableProperty]
         private int soMon;
+        [ObservableProperty]
+        private bool laPhongVIP=false;
     }
 }

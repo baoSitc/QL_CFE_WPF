@@ -10,7 +10,8 @@ namespace QL_CFE_WPF.ViewModels
     {
         public int Id { get; set; }
         public string TenSP { get; set; }
-        public decimal GiaBan { get; set; }
+        public decimal GiaBan { get; set; } = 0;
+        public decimal GiaVIP { get; set; } = 0;
         public string? HinhAnh { get; set; } // 🔥 thêm dòng này
 
         public decimal TonKho { get; set; }
