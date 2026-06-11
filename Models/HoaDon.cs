@@ -15,24 +15,27 @@ namespace QL_CFE_WPF.Models
         public int MaBan { get; set; }
 
         public DateTime Ngay { get; set; }
+        public string? SoHoaDon { get; set; }
 
         public decimal TongTien { get; set; }
 
-        public decimal VAT { get; set; }
+        public decimal VAT { get; set; } = 0;
 
-        public decimal GiamGia { get; set; }
+        public decimal GiamGia { get; set; } = 0;
         public int TrangThai { get; set; }
         public DateTime GioVao { get; set; } = DateTime.Now;
         public DateTime? GioRa { get; set; }
         public DateTime? NgayThanhToan { get; set; }
-        public decimal? TienKhachDua { get; set; }
-        public decimal? TienThoi { get; set; }
+        public decimal? TienKhachDua { get; set; } = 0;
+        public decimal? TienThoi { get; set; } = 0;
         public string? PhuongThuc { get; set; }
         public int? NhanvienID { get; set; }
-
-
+        public int? LanIn { get; set; } = 0;
+        public string? NguoiInCuoi { get; set; }
+        public DateTime? NgayInCuoi { get; set; }= DateTime.Now;
         // Navigation
         //public Ban Ban { get; set; }
         public List<ChiTietHoaDon> ChiTietHoaDons { get; set; } = new();
+       
     }
 }

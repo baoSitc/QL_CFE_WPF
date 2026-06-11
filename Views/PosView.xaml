@@ -218,6 +218,8 @@ Padding="5">
                     <RowDefinition Height="Auto"/>
                     <!-- Giảm -->
                     <RowDefinition Height="Auto"/>
+                    <!-- VAT -->
+                    <RowDefinition Height="Auto"/>
                     <!-- Thành tiền -->
                     <RowDefinition Height="Auto"/>
                     <!-- Button -->
@@ -320,7 +322,7 @@ Padding="5">
                     <TextBlock Text="Tổng cộng:" FontWeight="Bold"/>
                     <TextBlock Grid.Column="1"
                        Text="{Binding TongTien, StringFormat=N0}"
-                       FontWeight="Bold"
+                       FontWeight="Bold" FontSize="14"
                        Foreground="Blue"/>
                 </Grid>
 
@@ -337,15 +339,34 @@ Padding="5">
                     <ComboBox Grid.Column="1"
                       Width="60"
                       ItemsSource="{Binding DanhSachGiamGia}"
-                      SelectedItem="{Binding PhanTramGiam}"/>
+                      SelectedItem="{Binding PhanTramGiam,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
 
                     <TextBox Grid.Column="2"
                      Width="100" TextAlignment="Right"
                      Text="{Binding GiamGia, StringFormat=N0}"/>
                 </Grid>
+                <!-- 🎯 VAT -->
+                <Grid Grid.Row="4" Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="VAT:" FontWeight="Bold"/>
+
+                    <ComboBox Grid.Column="1"
+        Width="60"
+        ItemsSource="{Binding DanhSachGiamGia}"
+        SelectedItem="{Binding PhanTramVAT,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox Grid.Column="2"
+       Width="100" TextAlignment="Right"
+       Text="{Binding Vat, StringFormat=N0}"/>
+                </Grid>
 
                 <!-- 💵 THÀNH TIỀN -->
-                <Grid Grid.Row="4" Margin="5">
+                <Grid Grid.Row="5" Margin="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
@@ -360,7 +381,7 @@ Padding="5">
                 </Grid>
 
                 <!-- 🔥 BUTTON -->
-                <Button Grid.Row="5"
+                <Button Grid.Row="6"
                 Content="THANH TOÁN"
                 Command="{Binding ThanhToanCommand}"
                 Height="50"

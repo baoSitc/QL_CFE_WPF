@@ -50,7 +50,14 @@ namespace QL_CFE_WPF.ViewModels
         private decimal giamGia;   // tiền giảm
 
         [ObservableProperty]
-        private int phanTramGiam; // % giảm
+        private decimal phanTramGiam; // % giảm
+
+        [ObservableProperty]
+        private decimal vat;   // tiền giảm
+
+        [ObservableProperty]
+        private decimal phanTramVAT; // % giảm
+
         [ObservableProperty]
         private string tuKhoa;
         public ObservableCollection<SanPhamPosVM> SanPhamsLoc =>
@@ -102,7 +109,7 @@ namespace QL_CFE_WPF.ViewModels
         {
             OnPropertyChanged(nameof(SanPhamsLoc));
         }
-        public List<int> DanhSachGiamGia { get; set; } = new()
+        public List<decimal> DanhSachGiamGia { get; set; } = new()
         {
             0, 5, 10, 20, 30
         };
@@ -283,7 +290,7 @@ namespace QL_CFE_WPF.ViewModels
 
                 if (hd != null)
                 {
-                    hoaDonHienTai = hd;
+                    hoaDonHienTai = hd;                   
 
                     foreach (var ct in hd.ChiTietHoaDons)
                     {
@@ -321,9 +328,12 @@ namespace QL_CFE_WPF.ViewModels
                     hoaDonHienTai = newHd;
                 }
             }
-
+            PhanTramGiam = hd.GiamGia;
+            PhanTramVAT = hd.VAT;
             // 🔥 switch giỏ (KHÔNG load lại DB nữa)
             GioHang = GioHangTheoBan[MaBanDangChon];
+            OnPropertyChanged(nameof(PhanTramVAT));
+            OnPropertyChanged(nameof(PhanTramGiam));
 
             OnPropertyChanged(nameof(GioHang));
             OnPropertyChanged(nameof(TenBanDangChon));
@@ -663,15 +673,37 @@ namespace QL_CFE_WPF.ViewModels
             LoadGioHang(hd);
             PhanTramGiam = 0; // reset giảm giá khi thay đổi món
         }
-        partial void OnPhanTramGiamChanged(int value)
+        partial void OnPhanTramGiamChanged(decimal value)
 
         {
             if (GioHang == null || GioHang.Count == 0) return;
             var tong = hoaDonHienTai.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia);
-            GiamGia = tong * value / 100;
+            GiamGia =Math.Round( tong * value / 100,0);
 
+            // Cập nhật gIAM GIA vào database
+            using var db = new AppDbContext();
+            var hd = db.HoaDons.FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD);
+            if (hd != null)
+                hd.GiamGia = PhanTramGiam;
+            db.SaveChanges();
             CalculateTotal();
         }
+        //tính VAT
+        partial void OnPhanTramVATChanged(decimal value)
+        {
+            if (GioHang == null || GioHang.Count == 0) return;
+            var tong = hoaDonHienTai.ChiTietHoaDons.Sum(x => x.SoLuong * x.Gia);
+            Vat =Math.Round( (tong - GiamGia) * value / 100,0);
+            // Cập nhật VAT vào database
+            using var db = new AppDbContext();
+            var hd = db.HoaDons.FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD);
+            if (hd != null)
+                hd.VAT = PhanTramVAT;
+            db.SaveChanges();
+            
+            CalculateTotal();
+        }
+
         void TinhTienSauGiamGia()
         {
             if (hoaDonHienTai == null) return;
@@ -685,7 +717,6 @@ namespace QL_CFE_WPF.ViewModels
         //load gio hang
         void LoadGioHang(HoaDon hd)
         {
-
             GioHang.Clear();
 
             foreach (var ct in hd.ChiTietHoaDons)
@@ -698,6 +729,7 @@ namespace QL_CFE_WPF.ViewModels
                     SoLuong = ct.SoLuong
                 });
             }
+          
 
             CapNhatTonHienThi();
             CalculateTotal();
@@ -705,8 +737,11 @@ namespace QL_CFE_WPF.ViewModels
         void CalculateTotal()
         {
             TinhTienSauGiamGia();
-            TongTien = GioHang.Sum(h => h.Gia * h.SoLuong);
-            TongTienHienTai = TongTien - GiamGia;
+            TongTien = GioHang.Sum(h => h.Gia * h.SoLuong);         
+
+            GiamGia =Math.Round(TongTien * PhanTramGiam/100,0);
+            Vat = Math.Round((TongTien - GiamGia) * PhanTramVAT / 100, 0);
+            TongTienHienTai =Math.Round( TongTien + Vat - GiamGia,0);
             var ban = DanhSachBan.FirstOrDefault(x => x.MaBan == MaBanDangChon);
             if (ban != null)
             {
@@ -743,7 +778,7 @@ namespace QL_CFE_WPF.ViewModels
             };
             vm.OnThanhToanThanhCong = () =>
             {
-                var hoaDon = db.HoaDons
+                var hoaDon = db.HoaDons             
             .Include(x => x.ChiTietHoaDons)
             .ThenInclude(ct => ct.SanPham)
             .FirstOrDefault(x => x.MaHD == hoaDonHienTai.MaHD);
@@ -768,9 +803,22 @@ namespace QL_CFE_WPF.ViewModels
                 hoaDon.PhuongThuc = vm.PhuongThuc;             
 
                 hoaDon.GioRa = DateTime.Now;
-            hoaDon.TongTien = TongTienHienTai;
-            hoaDon.GiamGia = GiamGia;
-            db.SaveChanges();
+            hoaDon.TongTien =Math.Round(TongTienHienTai,0);
+            hoaDon.GiamGia = phanTramGiam;
+            hoaDon.VAT = phanTramVAT;
+                hoaDon.LanIn++;
+                hoaDon.NgayInCuoi = DateTime.Now;
+                hoaDon.NguoiInCuoi = Session.CurrentUser.TenDangNhap;
+                //tìm số hóa đơn
+                if (string.IsNullOrEmpty(hoaDon.SoHoaDon))
+                {
+                    var hoaDonService =
+                        new HoaDonService(db);
+
+                    hoaDon.SoHoaDon =
+                        hoaDonService.TaoSoHoaDon();
+                }
+                db.SaveChanges();
 
 
             TongTien = 0;
@@ -824,6 +872,9 @@ namespace QL_CFE_WPF.ViewModels
 
         void InBill(HoaDon hd)
         {
+            pdfBillService pdf= new pdfBillService();
+            pdf.ExportPdf(hd);
+            return;
             var printDialog = new PrintDialog();
             if (printDialog.ShowDialog() != true) return;
 
