@@ -169,7 +169,7 @@ namespace QL_CFE_WPF.ViewModels
 
             DanhSachBan = new ObservableCollection<BanView>(list);
 
-            PhanTramGiam = 0;
+            //PhanTramGiam = 0;
         }
         //Gop ban
         [RelayCommand]
@@ -328,8 +328,8 @@ namespace QL_CFE_WPF.ViewModels
                     hoaDonHienTai = newHd;
                 }
             }
-            PhanTramGiam = hd.GiamGia;
-            PhanTramVAT = hd.VAT;
+            PhanTramGiam = hd?.GiamGia??0;
+            PhanTramVAT = hd?.VAT ?? 0;
             // 🔥 switch giỏ (KHÔNG load lại DB nữa)
             GioHang = GioHangTheoBan[MaBanDangChon];
             OnPropertyChanged(nameof(PhanTramVAT));
@@ -574,8 +574,6 @@ namespace QL_CFE_WPF.ViewModels
                     : sp.GiaBan;
             }
 
-
-
             // 🔥 2. lưu vào ChiTietHoaDon (QUAN TRỌNG)
 
             var ct = db.ChiTietHoaDons
@@ -800,11 +798,12 @@ namespace QL_CFE_WPF.ViewModels
                 hoaDon.NgayThanhToan = DateTime.Now;
                 hoaDon.TienKhachDua = vm.TienKhachDua;
                 hoaDon.TienThoi = vm.TienThoi;
-                hoaDon.PhuongThuc = vm.PhuongThuc;             
+                hoaDon.PhuongThuc = vm.PhuongThuc;            
 
                 hoaDon.GioRa = DateTime.Now;
-            hoaDon.TongTien =Math.Round(TongTienHienTai,0);
-            hoaDon.GiamGia = phanTramGiam;
+            hoaDon.TongTien =Math.Round(TongTien,0);
+                hoaDon.ThanhTien= Math.Round(TongTienHienTai, 0);
+                hoaDon.GiamGia = phanTramGiam;
             hoaDon.VAT = phanTramVAT;
                 hoaDon.LanIn++;
                 hoaDon.NgayInCuoi = DateTime.Now;

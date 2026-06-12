@@ -33,25 +33,29 @@ namespace QL_CFE_WPF.ViewModels
             using var db = new Data.AppDbContext();
 
             IQueryable<ChiTietHoaDon> query = db.ChiTietHoaDons
+                
                 .Where(ct => ct.HoaDon.TrangThai == 1 &&
-                             ct.HoaDon.NgayThanhToan >= TuNgay &&
-                             ct.HoaDon.NgayThanhToan <= DenNgay.AddDays(1).AddTicks(-1));
+                             ct.HoaDon.Ngay >= TuNgay &&
+                             ct.HoaDon.Ngay <= DenNgay.AddDays(1).AddTicks(-1));
 
             List<BaoCaoHangHoaModel> data;
 
             switch (KieuDangChon)
             {
                 case KieuBaoCao.ChiTiet:
-                    data = query.Select(ct => new BaoCaoHangHoaModel
+                    data = query
+                        .Select(ct => new BaoCaoHangHoaModel
                     {
                         TenSP = ct.SanPham.TenSP,
                         SoLuong = ct.SoLuong,
                         DonGia = ct.Gia,
                         ThanhTien = ct.SoLuong * ct.Gia,
-                        Ngay = ct.HoaDon.NgayThanhToan,
-                        SoBan = ct.HoaDon.MaBan.ToString()
+                        Ngay = ct.HoaDon.Ngay,
+                        SoBan = ct.HoaDon.MaBan.ToString(),
+                        TenNhom = ct.SanPham.NhomHang.TenNhom,
                     })
-                    .OrderByDescending(x => x.Ngay)
+                        .OrderBy(ct => ct.TenNhom)                     
+                    .ThenByDescending(x => x.Ngay)
                     .ToList();
                     break;
 
@@ -63,9 +67,11 @@ namespace QL_CFE_WPF.ViewModels
                             TenSP = g.Key,
                             SoLuong = g.Sum(x => x.SoLuong),
                             DonGia = g.First().Gia,
-                            ThanhTien = g.Sum(x => x.SoLuong * x.Gia)
-                        })
-                        .OrderByDescending(x => x.SoLuong)
+                            ThanhTien = g.Sum(x => x.SoLuong * x.Gia),
+                            TenNhom = g.First().SanPham.NhomHang.TenNhom
+
+                        })                        
+                        .OrderByDescending(x => x.TenNhom)
                         .ToList();
                     break;
 

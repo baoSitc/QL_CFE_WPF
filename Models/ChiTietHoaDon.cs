@@ -15,6 +15,8 @@ namespace QL_CFE_WPF.Models
 
         public int SoLuong { get; set; }
         public decimal Gia { get; set; }
+        [NotMapped]
+        public decimal ThanhTien => SoLuong * Gia;
 
         [ForeignKey(nameof(MaHD))]
         public HoaDon HoaDon { get; set; }

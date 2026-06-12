@@ -26,6 +26,9 @@ Command="{Binding QuitCommand}"/>
                 <Button Content="Bán hàng"
         Style="{StaticResource MenuButton}"
         Command="{Binding ShowPosCommand}"/>
+                <Button Content="Hóa đơn"
+Style="{StaticResource MenuButton}"
+Command="{Binding ShowHoaDonCommand}"/>
 
                 <Button Content="Sản phẩm"
         Style="{StaticResource MenuButton}"
@@ -33,6 +36,7 @@ Command="{Binding QuitCommand}"/>
                 <Button Content="Nhân viên"
         Style="{StaticResource MenuButton}"
         Command="{Binding ShowNhanVienCommand}"/>
+                
                 <Button Content="Dashboard"
         Command="{Binding ShowDashboardCommand}"/>
 

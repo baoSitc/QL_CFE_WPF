@@ -12,5 +12,6 @@ namespace QL_CFE_WPF.Models
         public decimal ThanhTien { get; set; }
         public DateTime? Ngay { get; set; }
         public string SoBan { get; set; }
+        public string? TenNhom    { get; set; }
     }
 }

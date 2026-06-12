@@ -58,14 +58,14 @@ namespace QL_CFE_WPF.ViewModels
             using var db = new AppDbContext();
 
             var query = db.HoaDons
-                .Where(x => x.TrangThai == 1 && x.NgayThanhToan.HasValue);
+                .Where(x => x.TrangThai == 1 );
 
            List<ChartItem> result;
 
             if (KieuDangChon == KieuThongKe.HomNay)
             {
                 var rawData = db.HoaDons
-    .Where(x => x.TrangThai == 1 && x.NgayThanhToan.HasValue && x.NgayThanhToan.Value.Date == DateTime.Today)
+    .Where(x => x.TrangThai == 1 && x.Ngay.Date == DateTime.Today)
     .GroupBy(x => new
     {
         x.NgayThanhToan.Value.Date
@@ -120,7 +120,7 @@ namespace QL_CFE_WPF.ViewModels
 
             {
                 var rawData = db.HoaDons
-      .Where(x => x.TrangThai == 1 && x.NgayThanhToan.HasValue && x.NgayThanhToan.Value.Date >= DateTime.Today.AddDays(-7))
+      .Where(x => x.TrangThai == 1 && x.Ngay.Date >= DateTime.Today.AddDays(-7))
       .GroupBy(x => new
       {
           x.NgayThanhToan.Value.Date
@@ -148,7 +148,7 @@ namespace QL_CFE_WPF.ViewModels
             else if (KieuDangChon == KieuThongKe.ThangNay)
             {
                 var rawData = db.HoaDons
-     .Where(x => x.TrangThai == 1 && x.NgayThanhToan.HasValue && x.NgayThanhToan.Value.Month == DateTime.Today.Month && x.NgayThanhToan.Value.Year == DateTime.Today.Year)
+     .Where(x => x.TrangThai == 1 && x.Ngay.Month == DateTime.Today.Month && x.Ngay.Year == DateTime.Today.Year)
      .GroupBy(x => new
      {
          x.NgayThanhToan.Value.Month,
@@ -177,11 +177,11 @@ namespace QL_CFE_WPF.ViewModels
             else // Tháng trước
             {
                 var rawData = db.HoaDons
-    .Where(x => x.TrangThai == 1 && x.NgayThanhToan.HasValue && x.NgayThanhToan.Value.Month == DateTime.Today.AddMonths(-1).Month && x.NgayThanhToan.Value.Year == DateTime.Today.AddMonths(-1).Year)
+    .Where(x => x.TrangThai == 1 && x.Ngay.Month == DateTime.Today.AddMonths(-1).Month && x.Ngay.Year == DateTime.Today.AddMonths(-1).Year)
     .GroupBy(x => new
     {
-        x.NgayThanhToan.Value.Month,
-        x.NgayThanhToan.Value.Year
+        x.Ngay.Month,
+        x.Ngay.Year
 
     })
     .Select(g => new
@@ -255,11 +255,11 @@ namespace QL_CFE_WPF.ViewModels
             var today = DateTime.Today;
 
             DoanhThuHomNay = db.HoaDons
-                .Where(x => x.TrangThai == 1 && x.NgayThanhToan >= today)
+                .Where(x => x.TrangThai == 1 && x.Ngay >= today)
                 .Sum(x => (decimal?)x.TongTien) ?? 0;
 
             SoHoaDon = db.HoaDons
-                .Count(x => x.TrangThai == 1 && x.NgayThanhToan >= today);
+                .Count(x => x.TrangThai == 1 && x.Ngay >= today);
 
             SoBanDangDung = db.HoaDons
                 .Count(x => x.TrangThai == 0 && x.Ngay.Date == today);

@@ -65,19 +65,25 @@
                                     Binding="{Binding GioRa, StringFormat=HH:mm}"
                                     Width="100"/>
                 <DataGridTextColumn Header="Tổng tiền"
-                    Binding="{Binding ThanhTien, StringFormat={}{0:N0} đ}"
+                    Binding="{Binding TongTien, StringFormat={}{0:N0} đ}"
                     Width="150"/>
 
-                <DataGridTextColumn Header="Giảm giá"
-                                    Binding="{Binding GiamGia, StringFormat={}{0:N0}}"
+                <DataGridTextColumn Header="% Giảm giá"
+                                    Binding="{Binding GiamGia,StringFormat={}{0:N0}%}"
                                     Width="100"/>
+                <DataGridTextColumn Header="Tiền Giảm"
+                      Binding="{Binding TienGiamGia,StringFormat={}{0:N0}}"
+                      Width="100"/>
 
-                <DataGridTextColumn Header="VAT"
-                                    Binding="{Binding VAT, StringFormat={}{0:N0}}"
+                <DataGridTextColumn Header="% VAT"
+                                    Binding="{Binding VAT,StringFormat={}{0:N0}%}"
                                     Width="80"/>
+                <DataGridTextColumn Header="Tiền VAT"
+                      Binding="{Binding TienVAT,StringFormat={}{0:N0}}"
+                      Width="80"/>
 
                 <DataGridTextColumn Header="Thành tiền"
-                                    Binding="{Binding TongTien, StringFormat={}{0:N0} đ}"
+                                    Binding="{Binding ThanhTien, StringFormat={}{0:N0} đ}"
                                     Width="150"/>
 
             </DataGrid.Columns>

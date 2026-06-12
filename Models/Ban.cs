@@ -14,7 +14,6 @@ namespace QL_CFE_WPF.Models
         public string TenBan { get; set; }
         public int TrangThai { get; set; }
         public bool LaPhongVIP { get; set; } = false;
-        //public DateTime GioVao?{ get; set; }
-        //public DateTime GioRa? { get; set; }
+        
     }
 }

@@ -126,5 +126,10 @@ namespace QL_CFE_WPF.ViewModels
         {
             Application.Current.Shutdown();
         }
+        [RelayCommand]
+        void ShowHoaDon()
+        {
+            CurrentView = new HoaDonView();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -30,21 +31,23 @@ namespace QL_CFE_WPF.ViewModels
             using var db = new Data.AppDbContext();
 
             var data = db.HoaDons
+                .Include(x =>x.Ban)
                 .Where(x => x.TrangThai == 1 &&
-                            x.NgayThanhToan >= TuNgay &&
-                            x.NgayThanhToan <= DenNgay.AddDays(1).AddTicks(-1))
+                            x.Ngay >= TuNgay &&
+                            x.Ngay <= DenNgay.AddDays(1).AddTicks(-1))
                 .Select(x => new BaoCaoChiTietModel
                 {
-                    SoBan = x.MaBan.ToString(),
+                    SoBan = x.Ban.TenBan,
                     GioVao = x.GioVao,
                     GioRa = x.GioRa,
                     GiamGia = x.GiamGia,
                     VAT = x.VAT,
-                    TongTien = x.TongTien                    
+                    TongTien = x.TongTien,
+                    ThanhTien = x.ThanhTien
                 })
                 .OrderByDescending(x => x.GioRa)
                 .ToList();
-            TongDoanhThu = data.Sum(x => x.TongTien);
+            TongDoanhThu = data.Sum(x => x.ThanhTien);
             BaoCaoChiTiet.Clear();
             foreach (var item in data)
                 BaoCaoChiTiet.Add(item);
@@ -133,9 +136,9 @@ namespace QL_CFE_WPF.ViewModels
                 row.Cells.Add(Cell(item.SoBan));
                 row.Cells.Add(Cell(item.GioVao?.ToString("HH:mm")));
                 row.Cells.Add(Cell(item.GioRa?.ToString("HH:mm")));
-                row.Cells.Add(Cell(item.GiamGia.ToString("N0")));
-                row.Cells.Add(Cell(item.VAT.ToString("N0")));
-                row.Cells.Add(Cell(item.TongTien.ToString("N0")));
+                row.Cells.Add(Cell(item.TienGiamGia.ToString("N0")));
+                row.Cells.Add(Cell(item.TienVAT.ToString("N0")));
+                row.Cells.Add(Cell(item.ThanhTien.ToString("N0")));
 
                 dataGroup.Rows.Add(row);
             }
@@ -231,9 +234,9 @@ namespace QL_CFE_WPF.ViewModels
                 ws.Cells[row, 1].Value = item.SoBan;
                 ws.Cells[row, 2].Value = item.GioVao?.ToString("HH:mm");
                 ws.Cells[row, 3].Value = item.GioRa?.ToString("HH:mm");
-                ws.Cells[row, 4].Value = item.GiamGia;
-                ws.Cells[row, 5].Value = item.VAT;
-                ws.Cells[row, 6].Value = item.TongTien;
+                ws.Cells[row, 4].Value = item.TienGiamGia;
+                ws.Cells[row, 5].Value = item.TienVAT;
+                ws.Cells[row, 6].Value = item.ThanhTien;
 
                 // format tiền
                 ws.Cells[row, 4].Style.Numberformat.Format = "#,##0";
