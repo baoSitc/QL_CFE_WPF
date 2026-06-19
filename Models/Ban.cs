@@ -14,6 +14,7 @@ namespace QL_CFE_WPF.Models
         public string TenBan { get; set; }
         public int TrangThai { get; set; }
         public bool LaPhongVIP { get; set; } = false;
-        
+        public int ThuTu { get; set; }
+
     }
 }

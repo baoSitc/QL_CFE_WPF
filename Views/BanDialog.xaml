@@ -1,0 +1,100 @@
+﻿<Window x:Class="QL_CFE_WPF.Views.BanDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Quản lý bàn"
+        Width="600"
+        Height="500"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="10">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+
+        <StackPanel Orientation="Horizontal">
+
+            <Button Content="➕ Thêm"
+            Width="90"
+            Height="35"
+            Margin="5"
+            Command="{Binding AddBanCommand}"/>
+
+            <Button Content="🗑 Xóa"
+            Width="90"
+            Height="35"
+            Margin="5"
+            Command="{Binding DeleteBanCommand}"/>
+
+            <Button Content="▲ Lên"
+            Width="90"
+            Height="35"
+            Margin="5"
+            Command="{Binding MoveUpCommand}"/>
+
+            <Button Content="▼ Xuống"
+            Width="90"
+            Height="35"
+            Margin="5"
+            Command="{Binding MoveDownCommand}"/>
+
+            <Button Content="💾 Lưu"
+            Width="90"
+            Height="35"
+            Margin="5"
+            Command="{Binding SaveCommand}"/>
+
+        </StackPanel>
+
+        <!-- Grid -->
+
+        <DataGrid Grid.Row="1"
+                  Margin="0,10"
+                  ItemsSource="{Binding Bans}"
+                  SelectedItem="{Binding SelectedBan}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False">
+
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="Mã"
+                                    Width="70"
+                                    IsReadOnly="True"
+                                    Binding="{Binding MaBan}" />
+
+                <DataGridTextColumn Header="Tên bàn"
+                                    Width="*"
+                                    Binding="{Binding TenBan,
+                                        Mode=TwoWay,
+                                        UpdateSourceTrigger=PropertyChanged}" />
+
+                <DataGridCheckBoxColumn Header="Giá VIP"
+                                        Width="80"
+                                        Binding="{Binding LaPhongVIP}" />
+
+               
+                <DataGridTextColumn Header="STT"
+                    Width="70"
+                                    IsReadOnly="True"
+                    Binding="{Binding ThuTu}" />
+
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <!-- Footer -->
+
+        <Button Grid.Row="2"
+                Width="100"
+                Height="35"
+                HorizontalAlignment="Right"
+                Content="Đóng"
+                Click="BtnClose_Click"/>
+
+    </Grid>
+
+</Window>

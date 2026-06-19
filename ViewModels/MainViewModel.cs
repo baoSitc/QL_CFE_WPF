@@ -13,98 +13,32 @@ namespace QL_CFE_WPF.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-        //[ObservableProperty]
-        
-        //private ObservableCollection<SanPham> sanPhams;
-        //public MainViewModel()
-        //{
-        //    LoadData();
-        //}
-        //void LoadData()
-        //{
 
-        //    using var db = new Data.AppDbContext();
-        //    SanPhams = new ObservableCollection<SanPham>(db.SanPhams.OrderBy(x=>x.TenSP).ToList());
-
-        //}
-        //[RelayCommand]
-        //void AddSanPham()
-        //{
-        //    var newSanPham = new SanPham
-        //    {
-        //        TenSP = TenSP,
-        //        Gia = Gia,
-        //        NhomHangId = SelectedNhomHang?.Id ?? 0,
-        //    };
-        //    using var db = new Data.AppDbContext();
-        //    db.SanPhams.Add(newSanPham);
-        //    db.SaveChanges();
-        //    SanPhams.Add(newSanPham);
-        //}
-        //[RelayCommand]
-        //void RemoveSanPham(SanPham sp)
-        //{
-        //    if (sp == null) return;
-        //    using var db = new Data.AppDbContext();
-        //    db.SanPhams.Remove(sp);
-        //    db.SaveChanges();
-        //    SanPhams.Remove(sp);
-        //}
-        //[ObservableProperty]
-        //private string tenSP;
-        //[ObservableProperty]
-        //private decimal gia;
-        //[ObservableProperty]
-        //private SanPham selectedSanPham;
-        //[RelayCommand]
-        //void UpdateSanPham()
-        //{
-        //    if (SelectedSanPham == null) return;
-        //    using var db = new Data.AppDbContext();
-        //    var sp = db.SanPhams.Find(SelectedSanPham.MaSP);
-        //    if (sp != null)
-        //    {
-        //        sp.TenSP = TenSP;
-        //        sp.Gia = Gia;
-        //        db.SaveChanges();
-        //        LoadData();
-        //    }
-
-
-        //}
-        //partial void OnSelectedSanPhamChanged(SanPham value)
-        //{
-        //    if (value != null)
-        //    {
-        //        TenSP = value.TenSP;
-        //        Gia = value.Gia;
-        //    }
-        //}
         [ObservableProperty]
         private object currentView;
         [RelayCommand]
-        void ShowSanPham()
+        void SanPham()
         {
             CurrentView = new SanPhamView();
         }
         [RelayCommand]
-        void ShowPos()
+        void Pos()
         {
             CurrentView = new Views.PosView();
         }
         [RelayCommand]
-        void MoBaoCaoDoanhThu()
+        void BaoCaoDoanhThu()
         {
             CurrentView = new Views.BaoCaoDoanhThu();
         }
 
         [RelayCommand]
-        void MoBaoCaoHangHoa()
+        void BaoCaoHangHoa()
         {
             CurrentView = new BaoCaoHangHoa();
         }
         [RelayCommand]
-        void ShowDashboard()
+        void Dashboard()
         {
             CurrentView = new DashboardView
             {
@@ -112,7 +46,7 @@ namespace QL_CFE_WPF.ViewModels
             };
         }
         [RelayCommand]
-        void ShowNhanVien()
+        void NhanVien()
         {
             if (!PermissionService.Has("MANAGE_USER"))
             {
@@ -127,9 +61,17 @@ namespace QL_CFE_WPF.ViewModels
             Application.Current.Shutdown();
         }
         [RelayCommand]
-        void ShowHoaDon()
+        void HoaDon()
         {
             CurrentView = new HoaDonView();
+        }
+        [RelayCommand]
+        void Ban()
+        {
+            
+           
+            var win = new Views.BanDialog();           
+            win.Show();
         }
     }
 }

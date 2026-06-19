@@ -111,6 +111,9 @@ namespace QL_CFE_WPF.ViewModels
             table.Columns.Add(new TableColumn());
             table.Columns.Add(new TableColumn());
             table.Columns.Add(new TableColumn());
+            table.Columns.Add(new TableColumn());
+            table.Columns.Add(new TableColumn());
+            table.Columns.Add(new TableColumn());
 
             // HEADER
             var headerGroup = new TableRowGroup();
@@ -119,9 +122,12 @@ namespace QL_CFE_WPF.ViewModels
             headerRow.Cells.Add(Cell("Bàn", true));
             headerRow.Cells.Add(Cell("Giờ vào", true));
             headerRow.Cells.Add(Cell("Giờ ra", true));
-            headerRow.Cells.Add(Cell("Giảm", true));
-            headerRow.Cells.Add(Cell("VAT", true));
-            headerRow.Cells.Add(Cell("Tổng", true));
+            headerRow.Cells.Add(Cell("Tổng cộng", true));
+            headerRow.Cells.Add(Cell("%Giảm", true));
+            headerRow.Cells.Add(Cell("Tiền giảm", true));
+            headerRow.Cells.Add(Cell("%VAT", true));
+            headerRow.Cells.Add(Cell("Tiền VAT", true));
+            headerRow.Cells.Add(Cell("Thành tiền", true));
 
             headerGroup.Rows.Add(headerRow);
             table.RowGroups.Add(headerGroup);
@@ -136,7 +142,10 @@ namespace QL_CFE_WPF.ViewModels
                 row.Cells.Add(Cell(item.SoBan));
                 row.Cells.Add(Cell(item.GioVao?.ToString("HH:mm")));
                 row.Cells.Add(Cell(item.GioRa?.ToString("HH:mm")));
+                row.Cells.Add(Cell(item.ThanhTien.ToString("N0")));
+                row.Cells.Add(Cell(item.GiamGia.ToString("N0")+"%"));
                 row.Cells.Add(Cell(item.TienGiamGia.ToString("N0")));
+                row.Cells.Add(Cell(item.VAT.ToString("N0")+"%"));
                 row.Cells.Add(Cell(item.TienVAT.ToString("N0")));
                 row.Cells.Add(Cell(item.ThanhTien.ToString("N0")));
 

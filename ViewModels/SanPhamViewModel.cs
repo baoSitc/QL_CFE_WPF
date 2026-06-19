@@ -1,20 +1,64 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using QL_CFE_WPF.Data;
 using QL_CFE_WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace QL_CFE_WPF.ViewModels
 {
     public partial class SanPhamViewModel : ObservableObject
     {
-       
+        [ObservableProperty]
+        private string hinhAnh;
+
+        [ObservableProperty]
+        private BitmapImage anhPreview;
+        [RelayCommand]
+        private void ChonAnh()
+        {
+            var dlg = new OpenFileDialog();
+
+            dlg.Filter =
+                "Image Files|*.jpg;*.jpeg;*.png;*.bmp";
+
+            if (dlg.ShowDialog() != true)
+                return;
+
+            string sourceFile = dlg.FileName;
+
+            string imageFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Images");
+
+            if (!Directory.Exists(imageFolder))
+                Directory.CreateDirectory(imageFolder);
+
+            string fileName =
+                Guid.NewGuid().ToString()
+                + Path.GetExtension(sourceFile);
+
+            string destFile =
+                Path.Combine(imageFolder, fileName);
+
+            File.Copy(sourceFile,
+                      destFile,
+                      true);
+
+            HinhAnh = @"Images\" + fileName;
+
+            AnhPreview = new BitmapImage(
+                new Uri(destFile));
+        }
 
 
         [ObservableProperty]        
@@ -162,15 +206,26 @@ namespace QL_CFE_WPF.ViewModels
         public void LoadSanPhamTheoNhom()
         {
             using var db = new AppDbContext();
-
-            SanPhams = new ObservableCollection<SanPham>(
+            if (SelectedNhomHangId > 0)
+                SanPhams = new ObservableCollection<SanPham>(
+                    db.SanPhams.Include(x => x.NhomHang)
+                      .Where(x => x.NhomHangId == SelectedNhomHangId
+                      && (string.IsNullOrEmpty(tuKhoa) || x.TenSP.Contains(tuKhoa))
+                      )
+                      .OrderBy(x => x.TenSP)
+                      .ToList()
+                );
+            else
+            {
+                SanPhams = new ObservableCollection<SanPham>(
                 db.SanPhams.Include(x => x.NhomHang)
-                  .Where(x => x.NhomHangId == SelectedNhomHangId
-                  && (string.IsNullOrEmpty(tuKhoa) || x.TenSP.Contains(tuKhoa))
-                  )
+                  .Where(x=>x.TenSP.Contains(TuKhoa) )                  
                   .OrderBy(x => x.TenSP)
                   .ToList()
             );
+                
+            }
+
         }
 
         //Constructor
@@ -246,6 +301,7 @@ namespace QL_CFE_WPF.ViewModels
                 sp.GiaVIP = SelectedSanPham.GiaVIP;
                 sp.NhomHangId = SelectedNhomHangId;
                 sp.TrangThai = SelectedSanPham.TrangThai;
+                sp.HinhAnh = HinhAnh;
                 db.SaveChanges();
                 LoadSanPhamTheoNhom();
                 //LoadData();
@@ -260,10 +316,35 @@ namespace QL_CFE_WPF.ViewModels
         {
             if (value != null)
             {
+                
                 TenSP = value.TenSP;
                 Gia = value.Gia;
                 GiaVIP = value.GiaVIP;
-               // trangThai = value.TrangThai ? 1 : 0;
+                HinhAnh = value.HinhAnh??"";
+                SelectedNhomHangId = value.NhomHangId??0;
+            
+
+                string fullPath =
+                    Path.Combine(
+                        AppDomain.CurrentDomain.BaseDirectory,
+                        value.HinhAnh ?? "");
+
+                if (File.Exists(fullPath))
+                {
+                    AnhPreview = new BitmapImage(
+                        new Uri(fullPath));
+                }
+                //xóa trắng ảnh nếu không có HinhAnh
+                else
+                {
+                    AnhPreview = new BitmapImage(
+                        new Uri(
+                            Path.Combine(
+                                AppDomain.CurrentDomain.BaseDirectory,
+                                "Images",
+                                "no-image.png")));
+                }
+
             }
         }
         //load icon cho treeview

@@ -117,7 +117,7 @@ namespace QL_CFE_WPF.ViewModels
         {
             using var db = new Data.AppDbContext();
 
-            var ds = db.Bans.ToList();
+            var ds = db.Bans.OrderBy(x=>x.ThuTu).ToList();
 
             var list = ds.Select(b =>
             {

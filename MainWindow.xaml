@@ -1,63 +1,144 @@
 ﻿<Window x:Class="QL_CFE_WPF.MainWindow"
-        WindowState="Maximized"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:QL_CFE_WPF"
-        mc:Ignorable="d"
-        Title="Cà Phê App" Height="450" Width="800">
-    <Border BorderBrush="Red"
-        BorderThickness="2"
-        CornerRadius="10"
-        Padding="5">
-        
-        <Grid >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="PHỞ CÔ 9 GL"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
 
-            <!-- MENU -->
-            <StackPanel Margin="5">
-                <Button Content="Thoát"
-Style="{StaticResource MenuButton}"
-Command="{Binding QuitCommand}"/>
-                <Button Content="Bán hàng"
-        Style="{StaticResource MenuButton}"
-        Command="{Binding ShowPosCommand}"/>
-                <Button Content="Hóa đơn"
-Style="{StaticResource MenuButton}"
-Command="{Binding ShowHoaDonCommand}"/>
+    <Grid>
 
-                <Button Content="Sản phẩm"
-        Style="{StaticResource MenuButton}"
-        Command="{Binding ShowSanPhamCommand}"/>
-                <Button Content="Nhân viên"
-        Style="{StaticResource MenuButton}"
-        Command="{Binding ShowNhanVienCommand}"/>
-                
-                <Button Content="Dashboard"
-        Command="{Binding ShowDashboardCommand}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="230"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-                <Expander Header="📊 Báo Cáo" Margin="5">
+        <!-- MENU -->
 
-                    <StackPanel>
-                        <Button Content="Doanh thu"
-                Style="{StaticResource MenuButton}"
-                Command="{Binding MoBaoCaoDoanhThuCommand}"/>
+        <Border Grid.Column="0"
+                Background="#2F435A">
 
-                        <Button Content="Hàng hóa"
-                Style="{StaticResource MenuButton}"
-                Command="{Binding MoBaoCaoHangHoaCommand}"/>
+            <DockPanel>
+
+                <!-- HEADER -->
+
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="10">
+
+                    <TextBlock Text="☕ PHỞ CÔ 9 GL"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+
+                    <Separator Margin="0,10"/>
+
+                </StackPanel>
+
+                <!-- MENU -->
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                    <StackPanel Margin="10">
+
+                        <!-- Dashboard -->
+
+                        <Button Content="🏠 Dashboard"
+                                Height="45"
+                                Margin="0,3"
+                                Command="{Binding DashboardCommand}"/>
+
+                        <!-- Bán hàng -->
+
+                        <Button Content="🛒 Bán hàng"
+                                Height="45"
+                                Margin="0,3"
+                                Command="{Binding PosCommand}"/>
+
+                        <!-- Hóa đơn -->
+
+                        <Button Content="📄 Hóa đơn"
+                                Height="45"
+                                Margin="0,3"
+                                Command="{Binding HoaDonCommand}"/>
+
+                        <!-- Bàn -->
+
+                        <Button Content="🪑 Quản lý bàn"
+                                Height="45"
+                                Margin="0,3"
+                                Command="{Binding BanCommand}"/>
+
+                        <!-- DANH MỤC -->
+
+                        <Expander Header="📦 Danh mục"
+                                  Margin="0,5">
+
+                            <StackPanel>
+
+                                <Button Content="Sản phẩm"
+                                        Height="40"
+                                        Margin="5"
+                                        Command="{Binding SanPhamCommand}"/>
+
+                                <Button Content="Nhân viên"
+                                        Height="40"
+                                        Margin="5"
+                                        Command="{Binding NhanVienCommand}"/>
+
+                            </StackPanel>
+
+                        </Expander>
+
+                        <!-- BÁO CÁO -->
+
+                        <Expander Header="📊 Báo cáo"
+                                  Margin="0,5">
+
+                            <StackPanel>
+
+                                <Button Content="Doanh thu"
+                                        Height="40"
+                                        Margin="5"
+                                        Command="{Binding BaoCaoDoanhThuCommand}"/>
+
+                                <Button Content="Hàng hóa"
+                                        Height="40"
+                                        Margin="5"
+                                        Command="{Binding BaoCaoHangHoaCommand}"/>
+
+                            </StackPanel>
+
+                        </Expander>
+
+                        <Separator Margin="0,10"/>
+
+                        <!-- THOÁT -->
+
+                        <Button Content="🚪 Thoát"
+                                Height="45"
+                                Margin="0,3"
+                                Background="#C0392B"
+                                Foreground="White"
+                                Command="{Binding QuitCommand}"/>
+
                     </StackPanel>
-                </Expander>
-            </StackPanel>
-           
 
-            <!-- NỘI DUNG -->
-            <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
-            
-        </Grid>
-    </Border>
+                </ScrollViewer>
+
+            </DockPanel>
+
+        </Border>
+
+        <!-- CONTENT -->
+
+        <Border Grid.Column="1"
+                Background="#F5F5F5">
+
+            <ContentControl Content="{Binding CurrentView}"/>
+
+        </Border>
+
+    </Grid>
+
 </Window>

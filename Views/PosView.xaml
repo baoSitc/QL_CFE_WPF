@@ -157,21 +157,21 @@ Padding="5">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
 
-                                    <materialDesign:Card Width="150" Height="200" Margin="8" Background="LightBlue">
+                                    <materialDesign:Card Width="150" Height="150" Margin="5" Background="LightBlue">
                                         <Button Command="{Binding DataContext.AddToCartCommand, 
                                         RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" 
                                             HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="150" >
                                             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
                                                 <!-- ẢNH FULL -->
                                                 <Border CornerRadius="10" ClipToBounds="True">
-                                                    <Image Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding HinhAnh, Converter={StaticResource ImgConverter}}"/>
+                                                    <Image Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding HinhAnh, Converter={StaticResource ImgConverter}}"/>
                                                 </Border>
                                                 <!-- OVERLAY -->
-                                                <Border Background="#40000000" VerticalAlignment="Bottom" Height="50"/>
+                                                <Border Background="#40000000" VerticalAlignment="Bottom" Height="60" />
                                                 <!-- TEXT -->
                                                 <StackPanel VerticalAlignment="Bottom" Margin="8">
-                                                    <TextBlock Text="{Binding TenSP}" Foreground="White" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center"/>
-                                                    <TextBlock Text="{Binding  GiaBan,StringFormat={}{0:N0}}" TextAlignment="Center">
+                                                    <TextBlock Text="{Binding TenSP }" Foreground="White" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center"/>
+                                                    <TextBlock Text="{Binding  GiaBan,StringFormat={}{0:N0}}" TextAlignment="Center" FontWeight="Bold" FontSize="14">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
                                                                 <Setter Property="Foreground" Value="BlueViolet"/>

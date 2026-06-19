@@ -176,8 +176,33 @@
                             Width="100"
                             Height="35"
                             Command="{Binding DeleteSanPhamCommand}"/>
+                    <Button Content="📷 Chọn ảnh"
+        Width="120"
+        Height="35"
+        Margin="5"
+        Command="{Binding ChonAnhCommand}"/>
 
                 </StackPanel>
+             <!--Hiển thị ảnh-->
+                <Grid Grid.Row="1">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="100" Grid.Column="1"
+            Height="100" 
+            BorderBrush="Gray"
+            BorderThickness="2">
+                        <Image Source="{Binding AnhPreview}"
+               Stretch="UniformToFill"/>
+                    </Border>
+
+                    <!--<TextBox Grid.Column="1"
+             Margin="10,0,0,0"
+             Text="{Binding HinhAnh}"
+             IsReadOnly="True"/>-->
 
                 <!-- Search -->
 
@@ -187,11 +212,13 @@
                              Margin="0,0,10,0"
                              VerticalAlignment="Center"/>
 
-                <TextBox  Grid.Row="1"   Margin="0,0,15,0"
+                <TextBox  Grid.Row="1"   Margin="0,0,15,0" 
                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                   Text="{Binding TuKhoa,
                 UpdateSourceTrigger=PropertyChanged}"
-             materialDesign:HintAssist.Hint="Tìm kiếm..."/>
+             materialDesign:HintAssist.Hint="Tìm kiếm..." FontSize="15"/>
+
+                </Grid>
 
 
 
