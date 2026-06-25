@@ -92,10 +92,10 @@ namespace QL_CFE_WPF.ViewModels
             else if (KieuDangChon == KieuThongKe.HomQua)
             {
                 var rawData = db.HoaDons
-     .Where(x => x.TrangThai == 1 && x.NgayThanhToan.HasValue && x.NgayThanhToan.Value.Date == DateTime.Today.AddDays(-1))
+     .Where(x => x.TrangThai == 1 && x.Ngay.Date == DateTime.Today.AddDays(-1))
      .GroupBy(x => new
      {
-         x.NgayThanhToan.Value.Date,
+         x.Ngay.Date,
 
      })
      .Select(g => new
@@ -120,12 +120,8 @@ namespace QL_CFE_WPF.ViewModels
 
             {
                 var rawData = db.HoaDons
-      .Where(x => x.TrangThai == 1 && x.Ngay.Date >= DateTime.Today.AddDays(-7))
-      .GroupBy(x => new
-      {
-          x.NgayThanhToan.Value.Date
-
-      })
+      .Where(x => x.TrangThai == 1 && x.Ngay.Date >= DateTime.Today.AddDays(-6))
+     .GroupBy(x => x.Ngay.Date)
       .Select(g => new
       {
           g.Key.Date,
@@ -151,8 +147,8 @@ namespace QL_CFE_WPF.ViewModels
      .Where(x => x.TrangThai == 1 && x.Ngay.Month == DateTime.Today.Month && x.Ngay.Year == DateTime.Today.Year)
      .GroupBy(x => new
      {
-         x.NgayThanhToan.Value.Month,
-         x.NgayThanhToan.Value.Year
+         x.Ngay.Date.Month,
+         x.Ngay.Date.Year
 
      })
      .Select(g => new

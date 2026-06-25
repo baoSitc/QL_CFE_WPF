@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using QL_CFE_WPF.Data;
 using QL_CFE_WPF.Models;
 using QL_CFE_WPF.Views;
 using System;
@@ -13,6 +14,28 @@ namespace QL_CFE_WPF.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
+        private void CapNhatHoaDonTreo()
+        {
+            using var db = new AppDbContext();
+
+            var dsTreo = db.HoaDons
+      .Where(x => x.TrangThai == 0
+               && x.Ngay < DateTime.Today)
+      .ToList();
+
+            foreach (var hd in dsTreo)
+                hd.TrangThai = 7;
+
+            if (dsTreo.Any())
+                db.SaveChanges();
+        }
+        //Contructor
+        public  MainViewModel()
+        {
+           CapNhatHoaDonTreo();
+            CurrentView = new DashboardView();
+
+        }
 
         [ObservableProperty]
         private object currentView;

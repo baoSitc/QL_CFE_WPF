@@ -56,6 +56,8 @@ namespace QL_CFE_WPF.Models
                 {
                     0 => "Đang phục vụ",
                     1 => "Đã thanh toán",
+                    7 => "Treo qua ngày",
+                    8 => "Còn nợ",
                     9 => "Đã hủy",
                     _ => ""
                 };

@@ -6,7 +6,7 @@
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:QL_CFE_WPF.Views"
         mc:Ignorable="d"
-        Title="Đăng nhập Bằng Lăng Tím" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+        Title="Đăng nhập Phở Cô 9 Gia Lai" Height="450" Width="800" WindowStartupLocation="CenterScreen">
     <Grid Background="#F5F5F5">
         <Border Width="350" 
             Padding="20"

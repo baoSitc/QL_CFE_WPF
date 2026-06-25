@@ -60,6 +60,8 @@ namespace QL_CFE_WPF.ViewModels
                 new() { Value = null, Name = "Tất cả" },
                 new() { Value = 0, Name = "Đang phục vụ" },
                 new() { Value = 1, Name = "Đã thanh toán" },
+                 new() { Value = 7, Name = "Treo qua ngày" },
+                 new() { Value = 8, Name = "Còn nợ" },
                 new() { Value = 9, Name = "Đã hủy" }
             };
             SelectedTrangThai = TrangThaiFilters[0]; // mặc định Đã thanh toán hoặc [0] nếu muốn tất cả

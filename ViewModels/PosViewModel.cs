@@ -79,7 +79,7 @@ namespace QL_CFE_WPF.ViewModels
             using var db = new AppDbContext();
 
             var hoaDons = db.HoaDons
-                .Where(x => x.TrangThai == 0)
+                .Where(x => x.TrangThai == 0 && x.Ngay.Date==DateTime.Today )
                 .ToList();
 
             foreach (var hd in hoaDons)
@@ -144,7 +144,7 @@ namespace QL_CFE_WPF.ViewModels
                     // 🔥 fallback DB (chỉ khi chưa load)
                     var hd = db.HoaDons
                         .Include(x => x.ChiTietHoaDons)
-                        .Where(x => x.MaBan == b.MaBan && x.TrangThai == 0)
+                        .Where(x => x.MaBan == b.MaBan && x.TrangThai == 0 && x.Ngay.Date==DateTime.Today)
                         .FirstOrDefault();
 
                     return new BanView
