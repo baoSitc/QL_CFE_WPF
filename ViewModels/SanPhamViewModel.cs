@@ -93,7 +93,7 @@ namespace QL_CFE_WPF.ViewModels
             var ds = db.NhomHangs.ToList();
 
             RootNhomHangs = new ObservableCollection<NhomHangTreeVM>(
-                BuildTree(ds, null)
+                BuildTree(ds, 0)
             );
         }
         //crud nhóm hàng
@@ -273,8 +273,11 @@ namespace QL_CFE_WPF.ViewModels
             db.SaveChanges();
             SanPhams.Remove(sp);
         }
-     
-      
+       
+        public List<DonViTinh> DanhSachDonViTinh { get; } =
+              Enum.GetValues(typeof(DonViTinh)).Cast<DonViTinh>().ToList();
+        [ObservableProperty]
+        private DonViTinh donViTinhDangChon = DonViTinh.To;
 
 
 
@@ -302,6 +305,7 @@ namespace QL_CFE_WPF.ViewModels
                 sp.NhomHangId = SelectedNhomHangId;
                 sp.TrangThai = SelectedSanPham.TrangThai;
                 sp.HinhAnh = HinhAnh;
+                sp.DonViTinh = SelectedSanPham.DonViTinh;
                 db.SaveChanges();
                 LoadSanPhamTheoNhom();
                 //LoadData();

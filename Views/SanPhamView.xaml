@@ -245,6 +245,34 @@ Width="*">
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
 
+                        <DataGridTemplateColumn Header="ĐVT" Width="120">
+
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DonViTinh}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+
+                                    <ComboBox
+                ItemsSource="{Binding DataContext.DanhSachDonViTinh,
+                              RelativeSource={RelativeSource AncestorType=UserControl}}"
+
+                SelectedItem="{Binding DonViTinh,
+                               Mode=TwoWay,
+                               UpdateSourceTrigger=PropertyChanged}" />
+
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+
+                        </DataGridTemplateColumn>
+
+
+
+
+
                         <DataGridTextColumn Header="Giá thường"
                     Width="120">
                             <DataGridTextColumn.Binding>
