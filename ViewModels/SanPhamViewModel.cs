@@ -257,7 +257,8 @@ namespace QL_CFE_WPF.ViewModels
                 Gia = Gia,
                 GiaVIP = GiaVIP,
                 NhomHangId = SelectedNhomHangId,
-                TrangThai = true
+                TrangThai = true,
+                DonViTinh="Tô"
             };
             using var db = new Data.AppDbContext();
             db.SanPhams.Add(newSanPham);
@@ -277,7 +278,7 @@ namespace QL_CFE_WPF.ViewModels
         public List<DonViTinh> DanhSachDonViTinh { get; } =
               Enum.GetValues(typeof(DonViTinh)).Cast<DonViTinh>().ToList();
         [ObservableProperty]
-        private DonViTinh donViTinhDangChon = DonViTinh.To;
+        private DonViTinh donViTinhDangChon = DonViTinh.Tô;
 
 
 

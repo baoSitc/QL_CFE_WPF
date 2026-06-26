@@ -150,45 +150,106 @@ Padding="5">
 
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel ItemWidth="150" ItemHeight="200"/>
+                                    <WrapPanel ItemWidth="150"
+           ItemHeight="200"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
 
-                                    <materialDesign:Card Width="150" Height="150" Margin="5" Background="LightBlue">
-                                        <Button Command="{Binding DataContext.AddToCartCommand, 
-                                        RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" 
-                                            HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="150" >
-                                            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
-                                                <!-- ẢNH FULL -->
-                                                <Border CornerRadius="10" ClipToBounds="True">
-                                                    <Image Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding HinhAnh, Converter={StaticResource ImgConverter}}"/>
-                                                </Border>
-                                                <!-- OVERLAY -->
-                                                <Border Background="#40000000" VerticalAlignment="Bottom" Height="60" />
-                                                <!-- TEXT -->
-                                                <StackPanel VerticalAlignment="Bottom" Margin="8">
-                                                    <TextBlock Text="{Binding TenSP }" Foreground="White" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center"/>
-                                                    <TextBlock Text="{Binding  GiaBan,StringFormat={}{0:N0}}" TextAlignment="Center" FontWeight="Bold" FontSize="14">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="BlueViolet"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding TonHienThi}" Value="0">
-                                                                        <Setter Property="Foreground" Value="Red" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
+                                    <materialDesign:Card 
+                            
+                             Margin="5"
+                             Background="White" 
+                             
+                             Cursor="Hand"                             >
+
+                                        <Button
+                Background="Wheat" Height="200"
+                BorderThickness="0"
+                Padding="0"
+                Command="{Binding DataContext.AddToCartCommand,
+                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                CommandParameter="{Binding}">
+
+                                            <Grid>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="4*"/>
+                                                    <!-- Ảnh -->
+
+                                                    <RowDefinition Height="3*"/>
+                                                    <!-- Thông tin -->
+
+                                                    <RowDefinition Height="*"/>
+                                                    <!-- Nút -->
+                                                </Grid.RowDefinitions>
+
+                                                <!-- ================= IMAGE ================= -->                                                
+
+                                                    <Image
+                            Source="{Binding HinhAnh,
+                            Converter={StaticResource ImgConverter}}"
+                            Stretch="Uniform" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+                                              
+
+
+
+                                                <!-- ================= INFO ================= -->
+
+                                                <StackPanel Grid.Row="1"
+                                Margin="10,5">
+
+                                                    <!-- Tên sản phẩm -->
+
+                                                    <TextBlock Text="{Binding TenSP}"
+                                   FontWeight="SemiBold"
+                                   FontSize="15"
+                                   TextWrapping="Wrap" TextAlignment="Center"
+                                   MaxHeight="40"/>
+
+                                                    <!-- Giá -->
+
+                                                    <Grid Margin="0">
+
+                                                      
+                                                        <TextBlock FontWeight="Bold"
+                                       FontSize="16" FontStyle="Normal" Foreground="Blue" TextAlignment="Center">
+
+                                                           
+                                <Run Text="{Binding GiaBan,StringFormat={}{0:N0}}"/>
+                                <Run Text=" đ"/>
+
+                                                        </TextBlock>                                                       
+
+                                                    </Grid>
+
+                                                </StackPanel>
+
+                                                <!-- ================= BUTTON ================= -->
+
+                                                <Border Grid.Row="2" Margin="0"
+                           >
+
+                                                    <TextBlock FontWeight="Bold"
+       FontSize="16" Foreground="Red" TextAlignment="Center">
+
+                                                    <Run Text="{Binding GiaBan,StringFormat={}{0:N0}}"/>
+                                                    <Run Text=" đ"/>        
+
                                                     </TextBlock>
 
-                                                    <TextBlock Text="{Binding GiaVIP, StringFormat={}{0:N0} đ}" Foreground="Yellow" FontWeight="Bold" TextAlignment="Center"/>
-                                                </StackPanel>
+                                                </Border>
+
                                             </Grid>
+
                                         </Button>
+
                                     </materialDesign:Card>
+
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

@@ -12,6 +12,12 @@ namespace QL_CFE_WPF.Models
 
         [Description("Chai")]
         Chai,
+        [Description("Cái")]
+        Cái,
+        [Description("Chén")]
+        Chén,
+        [Description("Cuốn")]
+        Cuốn,
 
         [Description("Lon")]
         Lon,
@@ -20,18 +26,18 @@ namespace QL_CFE_WPF.Models
        Phần,
 
         [Description("Dĩa")]
-        Dia,
+        Dĩa,
 
         [Description("Hộp")]
-        Hop,
+        Hộp,
 
         [Description("Kg")]
         Kg,
 
         [Description("Gói")]
-        Goi,
+        Gói,
 
         [Description("Tô")]
-        To
+        Tô
     }
 }
