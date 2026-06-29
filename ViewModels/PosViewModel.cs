@@ -69,6 +69,9 @@ namespace QL_CFE_WPF.ViewModels
        
         public PosViewModel()
         {
+            hoaDonHienTai = new HoaDon();
+            hoaDonHienTai.MaHD = 0;
+            
             LoadSanPham();
             LoadDanhSachBan();
             LoadSauLogin();
@@ -446,6 +449,9 @@ namespace QL_CFE_WPF.ViewModels
             //    return;
             //}
             // 🔥 2. lưu vào ChiTietHoaDon (QUAN TRỌNG)
+            //Kiểm tra nếu chưa chọn hóa đơn thì thoát
+            if(hoaDonHienTai.MaHD==0) return;
+
             //kiểm tra bàn xem có phải là vip hay không để lấy giá
             using var db = new AppDbContext();
 

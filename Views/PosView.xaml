@@ -186,15 +186,22 @@ Padding="5">
                                                     <!-- Nút -->
                                                 </Grid.RowDefinitions>
 
-                                                <!-- ================= IMAGE ================= -->                                                
+                                                <!-- ================= IMAGE ================= -->
 
-                                                    <Image
-                            Source="{Binding HinhAnh,
-                            Converter={StaticResource ImgConverter}}"
-                            Stretch="Uniform" 
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-                                              
+                                                <Grid Width="130"
+                                                        Height="130">
+
+                                                    <Ellipse>
+                                                        <Ellipse.Fill>
+
+                                                            <ImageBrush
+                ImageSource="{Binding HinhAnh,
+                Converter={StaticResource ImgConverter}}"/>
+
+                                                        </Ellipse.Fill>
+                                                    </Ellipse>
+
+                                                </Grid>
 
 
 
@@ -208,7 +215,7 @@ Padding="5">
                                                     <TextBlock Text="{Binding TenSP}"
                                    FontWeight="SemiBold"
                                    FontSize="15"
-                                   TextWrapping="Wrap" TextAlignment="Center"
+                                   TextWrapping="Wrap" TextAlignment="Center" Foreground="OrangeRed"
                                    MaxHeight="40"/>
 
                                                     <!-- Giá -->
@@ -235,9 +242,9 @@ Padding="5">
                            >
 
                                                     <TextBlock FontWeight="Bold"
-       FontSize="16" Foreground="Red" TextAlignment="Center">
+                                                 FontSize="16" Foreground="Red" TextAlignment="Center">
 
-                                                    <Run Text="{Binding GiaBan,StringFormat={}{0:N0}}"/>
+                                                    <Run Text="{Binding GiaVIP,StringFormat={}{0:N0}}"/>
                                                     <Run Text=" đ"/>        
 
                                                     </TextBlock>
