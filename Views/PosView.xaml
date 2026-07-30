@@ -132,10 +132,13 @@
                 <TextBox Grid.Row="0"
              HorizontalAlignment="Center"
              Margin="0,5,0,5"
-             Height="30"
+             Height="30" Width="400"
              FontSize="14"
              materialDesign:HintAssist.Hint="Nhập tên sản phẩm cần tìm"
-             Text="{Binding TuKhoa, UpdateSourceTrigger=PropertyChanged}" Width="292"/>
+             Text="{Binding TuKhoa, UpdateSourceTrigger=PropertyChanged}" 
+                          FontWeight="SemiBold"
+ 
+                         Foreground="Red"/>
 
                 <!-- 🔥 SCROLL -->
                
@@ -343,7 +346,7 @@ Padding="5">
 
                         <DataGridTextColumn Header="Tên"
                                     Binding="{Binding TenSP}" FontWeight="Bold"
-                                    Width="3*"/>
+                                    Width="2*"/>
 
                         <DataGridTextColumn Header="SL"
                                     Binding="{Binding SoLuong}" FontWeight="Bold"
@@ -373,7 +376,7 @@ Padding="5">
                                     Binding="{Binding Gia, StringFormat=N0}"
                                     Width="100"/>
 
-                        <DataGridTextColumn Header="TT" 
+                        <DataGridTextColumn Header="Thành Tiền" 
                                     Binding="{Binding ThanhTien, StringFormat=N0}" FontWeight="Bold"
                                     Width="120" />
 
@@ -390,7 +393,7 @@ Padding="5">
                     <TextBlock Text="Tổng cộng:" FontWeight="Bold"/>
                     <TextBlock Grid.Column="1"
                        Text="{Binding TongTien, StringFormat=N0}"
-                       FontWeight="Bold" FontSize="14"
+                       FontWeight="Bold" FontSize="18"
                        Foreground="Blue"/>
                 </Grid>
 
@@ -443,7 +446,7 @@ Padding="5">
                     <TextBlock Text="Thành tiền:" FontWeight="Bold"/>
                     <TextBlock Grid.Column="1"
                        Text="{Binding TongTienHienTai, StringFormat=N0}"
-                       FontSize="16"
+                       FontSize="18"
                        FontWeight="Bold"
                        Foreground="Red"/>
                 </Grid>

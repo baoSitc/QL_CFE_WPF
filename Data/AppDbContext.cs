@@ -28,7 +28,7 @@ namespace QL_CFE_WPF.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
-@"Data Source=192.0.0.251\sqlexpress;
+@"Data Source=192.0.0.231\sqlexpress;
 Initial Catalog=QL_CAFE_WPF;
 User Id=sa;
 Password=Mclcnnbc@123Encovy;

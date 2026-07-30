@@ -15,5 +15,7 @@ namespace QL_CFE_WPF.Models
         public decimal TienVAT => Math.Round((TongTien-TienGiamGia)*VAT/100, 0);
         public decimal TongTien { get; set; }
         public decimal ThanhTien { get; set; }
+        public string PhuongThuc { get; set; }
+        public DateTime? Ngay { get; set; }
     }
 }

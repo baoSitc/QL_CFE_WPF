@@ -73,7 +73,7 @@ namespace QL_CFE_WPF.ViewModels
         {
             if (!PermissionService.Has("MANAGE_USER"))
             {
-                MessageBox.Show("Không có quyền");
+                MessageBox.Show("Bạn Không có quyền này!","Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             CurrentView = new NhanVienView();

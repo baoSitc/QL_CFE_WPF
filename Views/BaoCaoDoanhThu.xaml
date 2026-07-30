@@ -35,6 +35,7 @@
         Height="35"
         Margin="5"
         Command="{Binding InBaoCaoCommand}"/>
+                
                 <Button Content="📊 Xuất Excel"
         Width="120"
         Height="35"
@@ -52,6 +53,9 @@
                   AlternatingRowBackground="#F9F9F9">
 
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Ngày"
+                    Binding="{Binding Ngay,StringFormat=dd/MM/yyyy}"
+                    Width="80"/>
 
                 <DataGridTextColumn Header="Số bàn"
                                     Binding="{Binding SoBan}"
@@ -85,6 +89,9 @@
                 <DataGridTextColumn Header="Thành tiền"
                                     Binding="{Binding ThanhTien, StringFormat={}{0:N0} đ}"
                                     Width="150"/>
+                <DataGridTextColumn Header="Phương thức thanh toán"
+                     Binding="{Binding PhuongThuc}"
+                     Width="150"/>
 
             </DataGrid.Columns>
         </DataGrid>

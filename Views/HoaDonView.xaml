@@ -155,7 +155,12 @@
                                         Binding="{Binding LanIn}"/>
                     <DataGridTextColumn
     Header="Trạng thái"
-    Binding="{Binding TrangThaiText}" />
+    Binding="{Binding TrangThaiText}" />                    
+
+            
+                <DataGridTextColumn
+                Header="Phương thức"
+                Binding="{Binding PhuongThuc}" />
 
                 </DataGrid.Columns>
 

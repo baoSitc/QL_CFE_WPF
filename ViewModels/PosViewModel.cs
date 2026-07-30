@@ -114,7 +114,7 @@ namespace QL_CFE_WPF.ViewModels
         }
         public List<decimal> DanhSachGiamGia { get; set; } = new()
         {
-            0, 5, 10, 20, 30
+            0,3, 5,8, 10,15, 20, 30
         };
         void LoadDanhSachBan()
         {
@@ -438,7 +438,7 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         void AddToCart(SanPhamPosVM sp)
         {
-            if (sp == null) return;
+            if (sp == null || hoaDonHienTai == null ) return;
             //KHông cần kiểm tra tồn kho ở đây nữa vì đã kiểm tra khi giữ hàng rồi, nếu không đủ sẽ không cho thêm vào giỏ
             //var giuHangService = new GiuHangService(new AppDbContext());
             ////Giữ hàng trước
@@ -450,7 +450,7 @@ namespace QL_CFE_WPF.ViewModels
             //}
             // 🔥 2. lưu vào ChiTietHoaDon (QUAN TRỌNG)
             //Kiểm tra nếu chưa chọn hóa đơn thì thoát
-            if(hoaDonHienTai.MaHD==0) return;
+            if(hoaDonHienTai.MaHD==0 ) return;
 
             //kiểm tra bàn xem có phải là vip hay không để lấy giá
             using var db = new AppDbContext();

@@ -1,6 +1,7 @@
 ﻿using BCrypt.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
 using QL_CFE_WPF.Data;
 using QL_CFE_WPF.Models;
 using System;
@@ -41,7 +42,8 @@ namespace QL_CFE_WPF.ViewModels
         private bool trangThai = true;
         internal Action ClearPasswordRequested;
         [ObservableProperty]
-        private bool isEditing; // true = đang sửa, false = đang thêm
+        private bool isEditing=false;
+        private bool isAddting=true; // true = đang sửa, false = đang thêm
         public bool IsValid =>
     !string.IsNullOrWhiteSpace(TenDangNhap) &&
     !string.IsNullOrWhiteSpace(TenHienThi) &&
@@ -104,20 +106,26 @@ namespace QL_CFE_WPF.ViewModels
             using var db = new AppDbContext();
             DanhSach.Clear();
 
-            foreach (var nv in db.NhanViens)
+            foreach (var nv in db.NhanViens.Include(n => n.Role))
                 DanhSach.Add(nv);
             _cacheNhanVien = DanhSach.ToList();
             DanhSachRole = db.Roles.ToList();
+         
         }
-
         [RelayCommand]
         void Them()
         {
             using var db = new AppDbContext();
+            //kiểm tra xem tên đăng nhập đã tồn tại trong cơ sở dữ liệu chưa
+            if (db.NhanViens.Any(x => x.TenDangNhap.ToLower() == TenDangNhap.ToLower()))
+            {
+                MessageBox.Show("Tên đăng nhập đã tồn tại","Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var nv = new NhanVien
             {
-                TenDangNhap = TenDangNhap,
+                TenDangNhap = TenDangNhap.ToLower(),
                 MatKhau = BCrypt.Net.BCrypt.HashPassword(MatKhau),
                 TenHienThi = TenHienThi,
                 RoleId=RoleId,
@@ -129,6 +137,7 @@ namespace QL_CFE_WPF.ViewModels
 
             DanhSach.Add(nv);
             ClearForm();
+            Load();
         }
 
         [RelayCommand]
@@ -136,7 +145,7 @@ namespace QL_CFE_WPF.ViewModels
         {
             if (SelectedItem == null)
             {
-                MessageBox.Show("Chưa chọn nhân viên");
+                MessageBox.Show("Chưa chọn nhân viên", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

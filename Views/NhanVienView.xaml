@@ -26,7 +26,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="User" Binding="{Binding TenDangNhap}"/>
                 <DataGridTextColumn Header="Tên" Binding="{Binding TenHienThi}"/>
-                <DataGridTextColumn Header="Vai trò" Binding="{Binding VaiTro}"/>
+                <DataGridTextColumn Header="Vai trò" Binding="{Binding Role.TenRole}"/>
                 <DataGridCheckBoxColumn Header="Hoạt động" Binding="{Binding TrangThai}"/>
             </DataGrid.Columns>
         </DataGrid>
@@ -99,7 +99,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                
+                <!--<Button Content="Thêm" Command="{Binding ThemCommand}" Margin="5" IsEnabled="{Binding IsAdding}"/>-->
                 <Button Content="Sửa" Command="{Binding SuaCommand}" Margin="5" IsEnabled="{Binding IsEditing}"/>
                 <Button Content="Xóa" Command="{Binding XoaCommand}" Margin="5" IsEnabled="{Binding SelectedItem}"/>
             </StackPanel>

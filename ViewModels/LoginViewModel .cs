@@ -28,7 +28,7 @@ namespace QL_CFE_WPF.ViewModels
         private void Login()
         {
             if(string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(_password)) {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin đăng nhập.");
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin đăng nhập.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             using var db = new Data.AppDbContext();
@@ -46,7 +46,7 @@ namespace QL_CFE_WPF.ViewModels
             else
             {
                 IsLoginSuccessful = false;
-                MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
+                MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }

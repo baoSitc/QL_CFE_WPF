@@ -6,6 +6,7 @@ namespace QL_CFE_WPF.Models
 {
     public class BaoCaoHangHoaModel
     {
+        public int Stt { get; set; }=0;
         public string TenSP { get; set; }
         public int SoLuong { get; set; }
         public decimal DonGia { get; set; }

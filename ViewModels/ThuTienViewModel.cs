@@ -41,6 +41,12 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         void ChonTienNhanh(string soTien)
         {
+            //nếu khách trả hết tiền
+            if(soTien == "TatCa")
+            {
+                TienKhachDua = TongTienHienTai;
+                return;
+            }
             if (decimal.TryParse(soTien, out var value))
             {
                 TienKhachDua += value;
@@ -49,6 +55,13 @@ namespace QL_CFE_WPF.ViewModels
         [RelayCommand]
         void XacNhanThanhToan()
         {
+            //Nếu khách hàng chọn Phuong thức lá chuyển khoản
+            if (PhuongThuc== "Chuyển khoản")
+            {
+                TienKhachDua = TongTienHienTai;
+               
+            }
+
             if (TienKhachDua < TongTienHienTai)
             {
                 MessageBox.Show("Khách đưa chưa đủ tiền!");

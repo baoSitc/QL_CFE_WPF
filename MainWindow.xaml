@@ -97,12 +97,12 @@
 
                             <StackPanel>
 
-                                <Button Content="Doanh thu"
+                                <Button Content="💰Doanh thu"
                                         Height="40"
                                         Margin="5"
                                         Command="{Binding BaoCaoDoanhThuCommand}"/>
 
-                                <Button Content="Hàng hóa"
+                                <Button Content="🍜Hàng hóa"
                                         Height="40"
                                         Margin="5"
                                         Command="{Binding BaoCaoHangHoaCommand}"/>
@@ -115,7 +115,7 @@
 
                         <!-- THOÁT -->
 
-                        <Button Content="🚪 Thoát"
+                        <Button Content="🔚Thoát"
                                 Height="45"
                                 Margin="0,3"
                                 Background="#C0392B"

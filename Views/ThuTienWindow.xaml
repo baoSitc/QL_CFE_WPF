@@ -28,21 +28,24 @@
                   FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"/>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
 
-            <Button Content="50K" Width="60" Margin="5"
+            <Button Content="50K" Width="70" Margin="5"
             Command="{Binding ChonTienNhanhCommand}"
             CommandParameter="50000"/>
 
-            <Button Content="100K" Width="60" Margin="5"
+            <Button Content="100K" Width="70" Margin="5"
             Command="{Binding ChonTienNhanhCommand}"
             CommandParameter="100000"/>
 
-            <Button Content="200K" Width="60" Margin="5"
+            <Button Content="200K" Width="70" Margin="5"
             Command="{Binding ChonTienNhanhCommand}"
             CommandParameter="200000"/>
 
-            <Button Content="500K" Width="60" Margin="5"
+            <Button Content="500K" Width="70" Margin="5"
             Command="{Binding ChonTienNhanhCommand}" 
             CommandParameter="500000"/>
+            <Button Content="Trả hết" Width="80" Margin="5"
+Command="{Binding ChonTienNhanhCommand}" 
+CommandParameter="TatCa"/>
 
         </StackPanel>
 
